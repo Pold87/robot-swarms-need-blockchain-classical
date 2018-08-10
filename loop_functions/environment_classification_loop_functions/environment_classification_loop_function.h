@@ -119,6 +119,7 @@ class CEnvironmentClassificationLoopFunctions : public CLoopFunctions {
 
   std::ofstream timeFile; // Save the consensus time in seconds
   std::ofstream timeFileEnd; // Save the consensus time in seconds
+  std::ofstream votesFile; // Saves the votes sent to the SC per robot
 
   /* Flags to decide if save or not the files */
   bool everyTicksFileFlag;

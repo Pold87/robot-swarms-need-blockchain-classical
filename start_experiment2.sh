@@ -10,7 +10,7 @@ BLOCKCHAINPATH="$HOME/eth_data_para$1/data" # always without '/' at the end!!
 MINERID=$(expr 120 + $1)
 echo "MINERID is ${MINERID}"
 NUMROBOTS=(20)
-THRESHOLDS=(140000 160000 180000 200000 220000 240000 260000 280000 300000) 
+THRESHOLDS=(120000 100000 80000 60000) 
 REPETITIONS=20
 DECISIONRULE=$3
 PERCENT_BLACKS=(40)
@@ -26,7 +26,7 @@ USEDNODES=($1 $2)
 echo "USEDNODES is ${USEDNODES}"
 BASEPORT=$((33000 + $1 * 200))
 echo "BASEPORT is ${BASEPORT}"
-DATADIRBASE="data/experiment1_decision${DECISIONRULE}-node$1-${NOW}/"
+DATADIRBASE="data/experiment2-node$1-${NOW}/"
 REGENERATEFILE="$(pwd)/regenerate${USEDNODES[0]}.sh"
 # The miner node is the first of the used nodes
 MINERNODE=${USEDNODES[0]}
@@ -101,8 +101,8 @@ fi
 	# Create and compile smart contract
 	sed -e "s|THRESHOLD|$THRESHOLD|g" $SCTEMPLATE > $SCOUT
 	solc --overwrite --abi --bin -o . $SCOUT
-	cp Estimation.bin "${BASEDIR}/data.txt"
-	cp Estimation.abi "${BASEDIR}/interface.txt"	      
+	cp Estimation.bin "${BASEDIR}/data$1.txt"
+	cp Estimation.abi "${BASEDIR}/interface$1.txt"	      
 	
 	# Create template
 	sed -e "s|BASEDIR|$BASEDIR|g" -e "s|NUMRUNS|$NUMRUNS|g" -e "s|DATADIR|$DATADIR|g" -e "s|RADIX|$RADIX|g" -e "s|NUMROBOTS|$k|g" -e "s|R0|$R0|g" -e "s|B0|$B0|g" -e "s|PERCENT_BLACK|$PERCENT_BLACK|g" -e "s|PERCENT_WHITE|$PERCENT_WHITE|g" -e "s|DECISIONRULE|$DECISIONRULE|g" -e "s|USEMULTIPLENODES|$USEMULTIPLENODES|g" -e "s|MININGDIFF|$MININGDIFF|g" -e "s|MINERNODE|$MINERNODE|g" -e "s|MINERID|$MINERID|g" -e "s|BASEPORT|$BASEPORT|g" -e "s|USEBACKGROUNDGETHCALLS|$USEBACKGROUNDGETHCALLS|g" -e "s|BLOCKCHAINPATH|$BLOCKCHAINPATH|g" -e "s|MAPPINGPATH|$MAPPINGPATH|g" -e "s|THREADS|$THREADS|g" -e "s|USECLASSICALAPPROACH|$USECLASSICALAPPROACH|g" -e "s|NUMBYZANTINE|$y|g" -e "s|BYZANTINESWARMSTYLE|$BYZANTINESWARMSTYLE|g" -e "s|SUBSWARMCONSENSUS|$SUBSWARMCONSENSUS|g" -e "s|REGENERATEFILE|$REGENERATEFILE|g" -e "s|REALTIME|$REALTIME|g" $TEMPLATE > $OUTFILE

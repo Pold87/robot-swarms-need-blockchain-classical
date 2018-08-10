@@ -561,6 +561,12 @@ void CEnvironmentClassificationLoopFunctions::Init(TConfigurationNode& t_node) {
   incorrectParameters = false;
   m_pcRNG = CRandom::CreateRNG("argos");
 
+  /* TODO: add miner node to txt file name */
+  string allVotesFile = "allVotes.txt";
+  votesFile.open(allVotesFile.c_str(), std::ios_base::app | std::ios_base::out);
+  votesFile << "-----" << endl;
+
+  
   /* Setting variables according with the parameters of the configuration file (XML) */
 
   /* Translating percentages in numbers */
@@ -1081,8 +1087,19 @@ void CEnvironmentClassificationLoopFunctions::PreStep() {
     /* Get handle to e-puck entity and controller */
     CEPuckEntity& cEpuck = *any_cast<CEPuckEntity*>(it->second);
     
-    EPuck_Environment_Classification& cController =  dynamic_cast<EPuck_Environment_Classification&>(cEpuck.GetControllableEntity().GetController());
-    totalConsensusReached = totalConsensusReached && cController.getConsensusReached();    
+    EPuck_Environment_Classification& cController =  dynamic_cast<EPuck_Environment_Classification&>(cEpuck.GetControllableEntity().GetController());    
+    
+    totalConsensusReached = totalConsensusReached && cController.getConsensusReached();
+
+    /* TODO move to another place*/
+
+
+    if (votesFile.is_open()) {
+      if (cController.getVoteInformation() != "") {
+	votesFile << cController.getVoteInformation() << endl;
+	cController.setVoteInformation("");	
+      }
+    }    
   }
 
   if (totalConsensusReached) {

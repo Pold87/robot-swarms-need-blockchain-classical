@@ -49,7 +49,7 @@ contract Estimation {
       //weights[msg.sender] += 100 * (se - abs(delta));
       int absDelta = abs(delta);
       //      weights[msg.sender] += (2000000 - abs(delta));
-      weights[msg.sender] += -1 * (absDelta / 1000) * (absDelta / 1000) + 2000000;
+      weights[msg.sender] += -4 * (absDelta / 1000) * (absDelta / 1000) + 3000000;
     }
 
     // Ignore everything if the robots sensor is bad
