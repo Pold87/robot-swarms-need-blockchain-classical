@@ -6,11 +6,12 @@
   <!-- ************************* -->
   <framework>
    
-    <system threads="0" />
+    <system threads="20" />
 
     <experiment length="0"
                 ticks_per_second="10"
-                random_seed="23" />
+		real_time="false"
+                random_seed="0" />
 
   </framework>
 
@@ -20,7 +21,7 @@
 <controllers>
 
     <epuck_environment_classification_controller id="epc"
-     library="build/controllers/epuck_environment_classification/libepuck_environment_classification.so">
+     library="/Users/volkerstrobel/Documents/mygithub-software/blockchain-journal/build/controllers/epuck_environment_classification/libepuck_environment_classification">
      
       <actuators>
 	<epuck_wheels implementation="default" />
@@ -38,54 +39,55 @@
      	<simulation_parameters g="10" 
    			       sigma="10"
 			       turn="45"
-			       lamda="100"
+			       lambda="100"
 			       exitFlag="true"
+			       profiling="true"
 			       decision_rule=""
 			       num_pack_saved="2"
-			       percent_red="52"
-			       base_dir="/home/vstrobel/Documents/argdavide/controllers/epuck_environment_classification/"
+			       percent_white="66"
+			       base_dir="/Users/volkerstrobel/Documents/blockchain-journal/controllers/epuck_environment_classification/"
 			       use_multiple_nodes="true"
 			       use_background_geth_calls="true"
 			       interface_path="interface.txt"
-			       mapping_path="/home/vstrobel/Documents/argdavide/experiments/config.txt"
+			       mapping_path="/Users/volkerstrobel/Documents/blockchain-journal/experiments/config.txt"
 			       base_port=""
-			       blockchain_path="/home/vstrobel/eth_data_para/data"
+			       blockchain_path="/Users/volkerstrobel/eth_data_para/data"
 			       use_classical_approach="true"
-			       regenerate_file="REGENERATEFILE"
-			       percent_blue="48"/> <!-- Sigma and G must be inserted in seconds, not in ticks; 
+			       regenerate_file="/Users/volkerstrobel/Documents/mygithub-software/blockchain-journal/regenerate.sh"
+			       percent_black="34"/> <!-- Sigma and G must be inserted in seconds, not in ticks; 
 							  1 = Voter model; 2 = Direct comparison; 3 = Majority Rule-->
  
       </params>
     </epuck_environment_classification_controller>
   </controllers>
- <loop_functions  library="build/loop_functions/environment_classification_loop_functions/libenvironment_classification_loop_functions.so"
+ <loop_functions  library="/Users/volkerstrobel/Documents/mygithub-software/blockchain-journal/build/loop_functions/environment_classification_loop_functions/libenvironment_classification_loop_functions"
                   label="environment_classification_loop_functions">
 
   <cells  number_of_red_cells="0"
-	  base_dir_loop="/home/vstrobel/Documents/argdavide/controllers/epuck_environment_classification/"
-	  data_dir="data/experiment1_decision-node-classical-withbug/"
-          number_of_green_cells="0"
-	  number_of_blue_cells="0"
+	  base_dir_loop="/Users/volkerstrobel/Documents/blockchain-journal/controllers/epuck_environment_classification/"
+	  data_dir="data/experiment1_decision-node-13-08-2018/140000/"
+          number_of_white_cells="0"
+	  number_of_black_cells="0"
 	  using_percentage="true"
-          percent_red="52"
+	  percent_white="66"
 	  exit="true"            
-	  percent_blue="48"
-	  percent_green="0"
-	  save_every_ticks="100"
-	  save_every_ticks_flag="true"
+	  percent_black="34"
+	  percent_red="0"
+	  save_every_ticks="10000000"
+	  save_every_ticks_flag="false"
 	  save_every_run_flag="true"
 	  save_blockchain_flag="true"
-	  save_every_robot_flag="true"
-	  save_every_quality_flag="true"
-	  save_global_stat_flag="true"
-	  radix="num20_black48_byz0_run0"
-	  number_of_robots="20"
-	  number_of_runs="30"
-          number_of_qualities="2"
-          r_0="10"
-	  b_0="10"
-	  g_0="0"
-	  length_of_runs="10"
+	  save_every_robot_flag="false"
+	  save_every_quality_flag="false"
+	  save_global_stat_flag="false"
+	  radix="num4_black34_byz0_run2"
+	  number_of_robots="4"
+	  number_of_runs="1"
+	  number_of_qualities="2"
+	  r_0="0"
+	  w_0="4"
+	  b_0="0"	  
+	  length_of_runs="5000"
 	  g="10"
 	  sigma="10"
 	  lamda="100"
@@ -98,10 +100,10 @@
 	  base_port=""
 	  use_classical_approach="true"
 	  num_byzantine="0"
-	  byzantine_swarm_style="1"
-	  subswarm_consensus="true"
-	  regenerate_file="REGENERATEFILE"
-	  blockchain_path="/home/vstrobel/eth_data_para/data"/>
+	  byzantine_swarm_style="0"
+	  subswarm_consensus="false"
+	  regenerate_file="/Users/volkerstrobel/Documents/mygithub-software/blockchain-journal/regenerate.sh"
+	  blockchain_path="/Users/volkerstrobel/eth_data_para/data"/>
 
   </loop_functions>
   <!-- *********************** -->
@@ -131,7 +133,7 @@
    <distribute>
       <position method="uniform" min="0.1,0.1,0" max="1.9 , 1.9, 0" />
       <orientation method="gaussian" mean="1,1,0 " std_dev="360,0,0 " />
-      <entity quantity="20" max_trials="20">
+      <entity quantity="4" max_trials="20">
         <e-puck id="ep" >
           <controller config="epc" />
         </e-puck>

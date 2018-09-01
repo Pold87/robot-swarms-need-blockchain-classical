@@ -303,7 +303,7 @@ plot.MAE.by.byz.gg <- function(df, xlab, ylab, out.name, report.dir) {
               axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")))  +
         ylab(ylab) +
         xlab(xlab) +
-        base_breaks_y(seq(0.00, 0.08, 0.01)) +
+        base_breaks_y(seq(0.00, 0.36, 0.04)) +
         base_breaks_x(seq(0, 9, 1))         
 
     out.name <- paste0(report.dir, out.name)

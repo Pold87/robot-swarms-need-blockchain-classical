@@ -22,13 +22,13 @@
 
 using namespace argos;
 
-extern bool gethStaticErrorOccurred;
 extern std::map<int, std::string> coinbaseAddresses;	
 
 class CEnvironmentClassificationLoopFunctions : public CLoopFunctions {
 
  public:
   CEnvironmentClassificationLoopFunctions();
+  uint Id2Int(std::string id);
   virtual ~CEnvironmentClassificationLoopFunctions(){}
 
   virtual void Init(TConfigurationNode& t_node);
@@ -73,15 +73,6 @@ class CEnvironmentClassificationLoopFunctions : public CLoopFunctions {
   virtual void AssignNewStateAndPosition();
  private:
 
-  virtual void PreallocateEther();
-  virtual void RestartGeths();
-  virtual void InitEthereum();
-  virtual void PreinitMiner();
-  virtual void setContractAddressAndDistributeEther(std::string contractAddress, std::string minerAddress);
-  virtual bool allSameBCHeight();
-  virtual void connectMinerToEveryone();
-  virtual void disconnectAll(std::vector<int> allRobotIds);
-  virtual bool CheckEtherReceived();
   virtual void fillSettings(TConfigurationNode& tEnvironment);
   virtual std::vector<int> getAllRobotIds();
 	
@@ -109,17 +100,9 @@ class CEnvironmentClassificationLoopFunctions : public CLoopFunctions {
   std::ofstream globalStatFile;		// Flag: write global stats: time of exploring, diffusings,counted cells... true->write
   std::ofstream everyQualityFile;		// Flag: every robot writes his quality and his opinion, after each exploration state
   std::ofstream oneRobotFile;			// Flag: just robot "ff0" (always present) writes his qualities after each exp. state
-  std::ofstream blockChainFile;			// Flag: Write blockchain information to file
-  std::ofstream blockChainWhiteVotes;			// Flag: Write blockchain information to file
-
-  std::ofstream blockChainBlackVotes;			// Flag: Write blockchain information to file
-
-  std::ofstream blockChainLast2Votes;			// Flag: Write blockchain information to file
-
 
   std::ofstream timeFile; // Save the consensus time in seconds
   std::ofstream timeFileEnd; // Save the consensus time in seconds
-  std::ofstream votesFile; // Saves the votes sent to the SC per robot
 
   /* Flags to decide if save or not the files */
   bool everyTicksFileFlag;
@@ -127,7 +110,6 @@ class CEnvironmentClassificationLoopFunctions : public CLoopFunctions {
   bool qualityFileFlag;
   bool globalStatFileFlag;
   bool oneRobotFileFlag;
-  bool blockChainFileFlag;
 
   /* Counters for the number of robots in each state for every colour */
   UInt32 robotsInExplorationCounter[N_COL];
@@ -137,8 +119,8 @@ class CEnvironmentClassificationLoopFunctions : public CLoopFunctions {
   UInt32 byzantineRobotsInExplorationCounter[N_COL];
   UInt32 byzantineRobotsInDiffusionCounter[N_COL];
 	
-  /* When consensousReached is equal to the number of the colors the swarm reached a consensous */
-  UInt32 consensousReached;
+  /* When consensusReached is equal to the number of the colors the swarm reached a consensus */
+  UInt32 consensusReached;
 
   /* When true the experiment is not run. It could be true because of the incorrect number of robots
    * with an initial opinions (r_0+b_0 != number_of_robots) or because the percentages of colors of the
@@ -146,18 +128,11 @@ class CEnvironmentClassificationLoopFunctions : public CLoopFunctions {
    */
   bool incorrectParameters;
 
-  /* If after a significant amount of time, there are still no new block, there's a problem with the mining process and this flag is set to true */
-  bool miningNotWorkingAnymore;
-
-
-  /* If an error somewhere occured */
-  bool errorOccurred;
-
   /* True  -> Use percentage to assign the colors of the floor
    * False -> Use absolute numbers */
   bool using_percentage;
 
-  /* True  -> Exit for consensous reached
+  /* True  -> Exit for consensus reached
    * False -> Exit for number of qualities counted
    */
   bool exitFlag;
@@ -172,7 +147,7 @@ class CEnvironmentClassificationLoopFunctions : public CLoopFunctions {
   /* Parameters passed from configuration file */
   std::string passedRadix;
   UInt32 timeStep; // save statistics in everyTicksFile every <timeStep> ticks
-  UInt32 LAMDA,turn; // Parameters for the randomWalk: Lamda is the exponential mean and turn is the uniform parameter
+  UInt32 LAMBDA,turn; // Parameters for the randomWalk: Lambda is the exponential mean and turn is the uniform parameter
 
   UInt32 number_of_runs;
 
@@ -187,21 +162,16 @@ class CEnvironmentClassificationLoopFunctions : public CLoopFunctions {
   UInt32 g;
   UInt32 sigma;
   UInt32 decisionRule;
-  UInt32 miningDiff;
-  int minerId;
-  int minerNode;
-  std::string blockchainPath;
-  std::string regenerateFile;
   std::string baseDirLoop;
   std::string dataDir;
   std::string datadirBase;
   bool useMultipleNodes;
-  int basePort;
   int numByzantine;
   int byzantineSwarmStyle;
-  bool useClassicalApproach;
   int lengthOfRuns;
   bool subswarmConsensus;
+  double average_total_quality;
+  bool colorMixing;
 };
 
 

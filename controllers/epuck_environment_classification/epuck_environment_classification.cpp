@@ -2,7 +2,7 @@
 #include "epuck_environment_classification.h"
 
 #define ALPHA_CHANNEL 0
-#define COLOR_STRENGHT 255
+#define COLOR_STRENGTH 255
 #define N_COL 3
 
 #include <iostream>
@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <map>
 #include <thread>
+#include <algorithm>
 
 
 /****************************************/
@@ -40,6 +41,11 @@ EPuck_Environment_Classification::EPuck_Environment_Classification() :
 EPuck_Environment_Classification::CollectedData::CollectedData() :
   count (0) {}
 
+EPuck_Environment_Classification::MyPacket::MyPacket() :
+  value (0) {}
+
+
+
 EPuck_Environment_Classification::Opinion::Opinion() :
   countedCellOfActualOpinion (0)  {}
 
@@ -56,7 +62,7 @@ void EPuck_Environment_Classification::SimulationState::Init(TConfigurationNode&
     /* Getting sigma, G value and the decision rule to follow */
     GetNodeAttribute(t_node, "g", g);
     GetNodeAttribute(t_node, "sigma", sigma);
-    GetNodeAttribute(t_node, "lamda", LAMDA);
+    GetNodeAttribute(t_node, "lambda", LAMBDA);
     GetNodeAttribute(t_node, "turn", turn);
     GetNodeAttribute(t_node, "decision_rule", decision_rule);
     GetNodeAttribute(t_node, "exitFlag", exitFlag);
@@ -64,18 +70,32 @@ void EPuck_Environment_Classification::SimulationState::Init(TConfigurationNode&
     GetNodeAttribute(t_node, "percent_black", percentBlue);
     GetNodeAttribute(t_node, "num_pack_saved", numPackSaved);
     GetNodeAttribute(t_node, "base_dir", baseDir);
-    GetNodeAttribute(t_node, "base_port", basePort);
     GetNodeAttribute(t_node, "profiling", profiling);
+    GetNodeAttribute(t_node, "max_stored_opinions", maxStoredOpinions);
+    GetNodeAttribute(t_node, "use_lac", useLac);
+    GetNodeAttribute(t_node, "sybil_attack", sybilAttack);
+    GetNodeAttribute(t_node, "flooding_attack", floodingAttack);
+    GetNodeAttribute(t_node, "replay_attack", replayAttack);
   }
   catch(CARGoSException& ex) {
     THROW_ARGOSEXCEPTION_NESTED("Error initializing controller state parameters.", ex);
   }
 }
 
+/*
+  Convert a robot Id (fbxxx) to an integer (xxx)
+*/
+uint EPuck_Environment_Classification::Id2Int(std::string id) {
+
+  uint idConversion = id[2] - '0';
+  if(id[3]!='\0')
+    idConversion = (idConversion * 10) + (id[3] - '0');
+
+  return idConversion;
+}
+
 void EPuck_Environment_Classification::Init(TConfigurationNode& t_node) {
 
-  eventTrials = 0;
-  receivedDecision = true;
   consensusReached = false;
   
   /* Initialize the actuators (and sensors) and the initial velocity as straight walking*/
@@ -93,9 +113,10 @@ void EPuck_Environment_Classification::Init(TConfigurationNode& t_node) {
   simulationParams.sigma = simulationParams.sigma * 10;
 
   /* Colours read from robots could be changed and added here! AGGIUNGERECOLORI */
-  red.Set(COLOR_STRENGHT,0,0,ALPHA_CHANNEL);      // Change alphachannel has not effect visively, but changing COLOR_STRENGHT could make
-  green.Set(0,COLOR_STRENGHT,0,ALPHA_CHANNEL);    // cells more or less bright
-  blue.Set(0,0,COLOR_STRENGHT,ALPHA_CHANNEL);
+  red.Set(COLOR_STRENGTH,0,0,ALPHA_CHANNEL)
+    ;      // Change alphachannel has not effect visively, but changing COLOR_STRENGTH could make
+  green.Set(0,COLOR_STRENGTH,0,ALPHA_CHANNEL);    // cells more or less bright
+  blue.Set(0,0,COLOR_STRENGTH,ALPHA_CHANNEL);
 
   /* Assign the initial state of the robots: all in exploration state*/
   m_sStateData.State = SStateData::STATE_EXPLORING;
@@ -110,17 +131,12 @@ void EPuck_Environment_Classification::Init(TConfigurationNode& t_node) {
     simulationParams.percentRed = simulationParams.percentBlue;
   simulationParams.percentRed = simulationParams.percentRed / 100;
 
-  voteInformation = "";
-    
 }
-
 
 /************************************************* CONTROL STEP ************************************************/
 /***************************************************************************************************************/
 void EPuck_Environment_Classification::ControlStep() {
 
-  int robotId = Id2Int(GetId());
-  
   /* Turn leds according with actualOpinion */
   TurnLeds();
 	
@@ -193,7 +209,7 @@ void EPuck_Environment_Classification::RandomWalk() {
       else 						// The robot was turning, time to go straight for ->
 	// -> an exponential period of time //
 	{
-	  movement.walkTime = Ceil(m_pcRNG->Exponential((Real)simulationParams.LAMDA)*4); // Exponential random generator. *50 is a scale factor for the time
+	  movement.walkTime = Ceil(m_pcRNG->Exponential((Real)simulationParams.LAMBDA)*4); // Exponential random generator. *50 is a scale factor for the time
 	  movement.actualDirection = 0;
 	}
     }
@@ -207,62 +223,76 @@ void EPuck_Environment_Classification::RandomWalk() {
 /***************************************************************************************************************/
 void EPuck_Environment_Classification::Explore() {
 
-  int robotId = Id2Int(GetId());
+  explorationCounter++;
   
-  /* remainingExplorationTime it's the variable decremented each control step. 
-   * This variable represents the time that a robot must still spend in exploration state.
-   * If this variable it's greater than zero, then it must be decremented and the robot should 
-   * do exploration's stuffs (Update counters figuring out in which cell he is. It's done in loop function */
   if(m_sStateData.remainingExplorationTime > 0){		
+   
     m_sStateData.remainingExplorationTime--;
-  }
 
-  /* If its time to change state, then the robot has to reset his own variables:
-   * - Assign a new random exponential time: remainingExplorationTime and explorDurationTime (used to
-   *   keep trace of the exploration times, just for statistic aims);
-   * - Calculate the quality of the opinion, basing on the sensed datas (Number of counted cells of actual
-   *   opinion / Number of total counted cells);
-   * - Reset counting variables (countedCellOfActualOpinion and count [total number of cells counted]);
-   * - Change state: Exploration->Diffusing;
-   * - Generate a new Diffusing time (same as exploring, but used for Diffusing state and calculated with
-   *   different params for the random variable;
-   */
-  else{
-
-
-    /* If this robot is a Byzantine robot, it always uses quality estimate 1.0 */
-    if (byzantineStyle == 1) {
-      opinion.quality = 1.0;
-
-      /* If this robot is a Byzantine robot, its quality estimate is
-	 drawn from a value between 0.0 and 1.0 */
-    } else if (byzantineStyle == 2) {
-      opinion.quality = m_pcRNG->Uniform(CRange<Real>(0.0,1.0));
-      
-    } else {
-      opinion.quality = (Real)((Real)(opinion.countedCellOfActualOpinion)/(Real)(collectedData.count));    
+    
+    /* Send estimates to other robots  */
+    CCI_EPuckRangeAndBearingActuator::TData toSend;
+    toSend[0] = Id2Int(GetId());
+    double totalQualityRounded = roundf(totalQuality * 100);
+    
+    if (numExplorationPhase > 2) {
+      toSend[1] = (int) (totalQualityRounded);
+      toSend[2] = 1;
     }
 
-    opinion.countedCellOfActualOpinion = 0;
-    collectedData.count = 0;
-    m_sStateData.State = SStateData::STATE_DIFFUSING;
+    if (byzantineStyle == 1) {
+      toSend[1] = 0;
+    } 
 
-    uint opinionInt = (uint) (opinion.quality * 10000000); // Convert opinion quality to a value between 0 and 10000000
+    if (byzantineStyle == 2) {
+      toSend[1] = 1;
+    }
 
-
-    ostringstream voteAndIdStream;
-    voteAndIdStream << opinionInt << "," << robotId;
-    voteInformation = voteAndIdStream.str();
-          
-    string args[0] = {};
-    smartContractInterfaceStringBg(robotId, interface, contractAddress, "vote", args, 0, opinionInt, nodeInt, simulationParams.blockchainPath);
+    if (byzantineStyle == 3) {
+      CRange<Real> zeroOne(0.0,1.0);
+      Real p = m_pcRNG->Uniform(zeroOne);
+      if (p > 0.5) {
+	toSend[1] = 0;
+      }
+      else {
+	toSend[1] = 1;
+      }
+    }
     
-    /* Assigning a new exploration and time, for the next exploration state */
+    if (byzantineStyle > 0 && simulationParams.floodingAttack) {
+      /* Generate a random identity to steal identity from someone */
+      CRange<UInt32> zero255(0, 255);
+      UInt32 randomIdentity = m_pcRNG->Uniform(zero255);
+      toSend[0] = randomIdentity;
+    }
+
+    m_pcRABA->SetData(toSend);
     
-    //    m_sStateData.remainingExplorationTime = Ceil(m_pcRNG->Exponential((Real)simulationParams.sigma));
-    m_sStateData.remainingExplorationTime = 300;
-    m_sStateData.explorDurationTime = m_sStateData.remainingExplorationTime;
-  }  
+  } else {
+    m_sStateData.State = SStateData::STATE_DIFFUSING;  
+  }
+
+
+  /* Receive packets */
+  const CCI_EPuckRangeAndBearingSensor::TPackets& tPackets = m_pcRABS->GetPackets();
+  
+  /* Determine how many non-initialized messages there are*/
+  for(size_t i = 0; i < tPackets.size() ; ++i) {
+
+    /* Check if it is initialized and if a opinion of this robot was
+       already received */
+    if (tPackets[i]->Data[2] == 1 && !alreadyReceived[tPackets[i]->Data[0]]) {
+      alreadyReceived[tPackets[i]->Data[0]] = true;
+      if (receivedPackets.size() < simulationParams.maxStoredOpinions)
+	receivedPackets.push_back(tPackets[i]->Data[1]);
+      else
+	receivedPackets[currentPosition] = tPackets[i]->Data[1];
+      currentPosition = (currentPosition + 1) % simulationParams.maxStoredOpinions;
+      }
+  }
+  
+  m_pcRABS->ClearPackets();
+  
 }
 
 /************************************************* DIFFUSING STATE *********************************************/
@@ -270,15 +300,116 @@ void EPuck_Environment_Classification::Explore() {
 
 void EPuck_Environment_Classification::Diffusing() {
 
-  /* Query consensous reached */
-  if (!threadCurrentlyRunning){
-    threadCurrentlyRunning = true;
-    thread t1(&EPuck_Environment_Classification::WaitForDecision, this);
-    t1.detach();
+  numExplorationPhase++;
+
+  /* Make a snapshot of the current estimate*/
+  
+  /* Own estimate of this exploration phase */
+  opinion.quality = (Real)((Real)(opinion.countedCellOfActualOpinion) / (Real)(collectedData.count));
+
+  vector<int> msgs;
+  vector<int> smaller_than;
+  vector<int> greater_than;
+  vector<int> msgs_cleaned;
+
+
+  if (simulationParams.useLac) {
+    msgs_cleaned = receivedPackets;
+  } else {
+
+    /* Apply W-SR */
+
+    /* Parameter of the W-MSR algorithm */
+    int F = 2;   
+
+    std::sort(receivedPackets.begin(), receivedPackets.end());
+  
+    for (vector<int>::iterator it = receivedPackets.begin() ; it != receivedPackets.end(); ++it) {
+
+       if (*it < opinion.quality)
+	/* put into smaller than array */
+	smaller_than.push_back(*it);
+      
+      else
+	/* ...put into greater than array */
+	greater_than.push_back(*it);
+    }
+    
+    
+    if (greater_than.size() < F) {
+      greater_than.clear();
+    } else {
+      greater_than.resize(greater_than.size() - F);
+    }
+    
+    if (smaller_than.size() < F) {
+      smaller_than.clear();
+    } else {
+      smaller_than.erase(smaller_than.begin(), smaller_than.begin() + F);
+    }
+    
+    msgs_cleaned.reserve( greater_than.size() + smaller_than.size() ); // preallocate memory
+    msgs_cleaned.insert( msgs_cleaned.end(), greater_than.begin(), greater_than.end() );
+    msgs_cleaned.insert( msgs_cleaned.end(), smaller_than.begin(), smaller_than.end() );
   }
+  
+  double weight = 1.0 / (msgs_cleaned.size() + 1);  
+
+  currentQuality = opinion.quality * weight;
+
+  if (Id2Int(GetId()) == 1) {
+
+    std::ofstream robotOpinion;
+    
+    robotOpinion.open("robot1opinion.txt", std::ios_base::out | std::ios_base::app);
+
+    robotOpinion << currentQuality << "," << opinion.countedCellOfActualOpinion << "," << collectedData.count << "," << totalQuality << ","  << endl;
+
+    robotOpinion.close();
+    
+  }
+
+  
+
+  /* Apply the update rule */
+  for (vector<int>::iterator it = msgs_cleaned.begin() ; it != msgs_cleaned.end(); ++it) {
+    currentQuality += weight * (((double) *it) / 100.0);
+  }
+  
+    if (byzantineStyle == 1) {
+      totalQuality = 0.0;
+      
+    } else {
+      totalQuality = totalQuality + (currentQuality - totalQuality) / ((double) numExplorationPhase);
+      cout << "current quality is " << currentQuality << endl;
+      cout << "Total quality is " << totalQuality << endl;
+      //      cout << "tPackets.size is " << tPackets.size() << endl;
+      cout << "num exp phase" << numExplorationPhase << endl;
+    }
+
+
+  opinion.countedCellOfActualOpinion = 0;
+  collectedData.count = 0;
+  
+
+  /* Prepare packets vector again */
+  for (int i = 0; i < 256; i++) {
+    alreadyReceived[i] = false;
+  }
+  totalOpinionsReceived = 0;
+  currentPosition = 0;
+  receivedPackets.clear();
+  
+
+  /* Set remaining exploration time */
   
   /* Change to EXPLORING state and choose another opinion with decision rules */
   m_sStateData.State = SStateData::STATE_EXPLORING;
+
+  /* Assigning a new exploration time, for the next exploration state */
+    
+  m_sStateData.remainingExplorationTime = 150;
+  m_sStateData.explorDurationTime = m_sStateData.remainingExplorationTime;
     
 }
 
@@ -330,55 +461,35 @@ void EPuck_Environment_Classification::fromLoopFunctionResPrepare(){
 
   opinion.countedCellOfActualOpinion = 0;
   opinion.quality = 0;
+  opinion.mean = 0;
+  opinion.M2 = 0;
+  opinion.delta = 0.0;
+  opinion.delta2 = 0.0;
+  opinion.se = 0.0;
   collectedData.count = 0;
 
   CCI_EPuckRangeAndBearingActuator::TData toSend;
+
+  currentQuality = 0.0;
+  totalQuality = 0.0;
+  numExplorationPhase = 0;
+
   toSend[0] = Id2Int(GetId());
+  toSend[1] = totalQuality;
+  toSend[2] = 0; /* 0: robot has not explored yet; 1: robot has explored */
   m_pcRABA->SetData(toSend);
   m_pcRABS->ClearPackets();
   TurnLeds();
 
+  
   /* Assign the initial state of the robots: all in exploration state*/
   m_sStateData.State = SStateData::STATE_EXPLORING;
 
   /* Assign the exploration time (random generated) */
-  m_sStateData.remainingExplorationTime = (m_pcRNG->Exponential((Real)simulationParams.sigma));
+  //m_sStateData.remainingExplorationTime = (m_pcRNG->Exponential((Real)simulationParams.sigma));
+  m_sStateData.remainingExplorationTime = 150;
   m_sStateData.explorDurationTime = m_sStateData.remainingExplorationTime;
-
-  int robotId = Id2Int(GetId());
-
-  beginning = true;
   
-  /* Ethereum */
-  nodeInt = robotIdToNode[robotId];       
-  interface = readStringFromFile(simulationParams.baseDir + simulationParams.interfacePath);
-    
-  ostringstream genesisPathStream;
-  genesisPathStream << "~/genesis/genesis" << simulationParams.basePort << ".json";
-  string genesisPath = genesisPathStream.str();
-  geth_init(robotId, nodeInt, simulationParams.basePort, simulationParams.blockchainPath, genesisPath);
-  start_geth(robotId, nodeInt, simulationParams.basePort, simulationParams.blockchainPath);
-  createAccount(robotId, nodeInt, simulationParams.basePort, simulationParams.blockchainPath);
-  coinbaseAddresses[robotId] = getCoinbase(robotId, nodeInt, simulationParams.basePort, simulationParams.blockchainPath);
-  address = coinbaseAddresses[robotId];          
-  prepare_for_new_genesis(robotId, nodeInt, simulationParams.basePort, simulationParams.blockchainPath);      
-}
-
-void EPuck_Environment_Classification::fromLoopFunctionResStart(){
-
-  if (!simulationParams.useClassicalApproach) {
-    int robotId = Id2Int(GetId());
-  
-    ostringstream genesisPathStream;
-    genesisPathStream << "~/genesis/genesis" << simulationParams.basePort << ".json";
-    string genesisPath = genesisPathStream.str();
-        
-    geth_init(robotId, nodeInt, simulationParams.basePort, simulationParams.blockchainPath, genesisPath);
-    start_geth(robotId, nodeInt, simulationParams.basePort, simulationParams.blockchainPath);
-    enodes[robotId] = get_enode(robotId, nodeInt, simulationParams.basePort, simulationParams.blockchainPath);
-    enode = enodes[robotId];
-    unlockAccount(robotId, "test", nodeInt, simulationParams.basePort, simulationParams.blockchainPath);
-  }
 }
 
 /****************************************/

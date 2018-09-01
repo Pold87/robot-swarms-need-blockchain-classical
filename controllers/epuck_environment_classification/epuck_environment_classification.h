@@ -2,8 +2,16 @@
 #define EPUCK_ENVIRONMENT_CLASSIFICATION_H
 #include <argos3/core/control_interface/ci_controller.h>
 #include <argos3/core/utility/configuration/argos_configuration.h>
+
+
+//#include "myci_epuck_range_and_bearing_actuator.h"
+//#include "myci_epuck_range_and_bearing_sensor.h"
+
+
 #include <argos3/plugins/robots/e-puck/control_interface/ci_epuck_range_and_bearing_actuator.h>
 #include <argos3/plugins/robots/e-puck/control_interface/ci_epuck_range_and_bearing_sensor.h>
+
+
 #include <argos3/plugins/robots/e-puck/control_interface/ci_epuck_proximity_sensor.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_differential_steering_actuator.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_leds_actuator.h>
@@ -20,8 +28,6 @@
 #include <stdlib.h>
 #include <ctime>
 #include <iostream>
-
-#include "geth_static.h" /* Use geth from C++ */
 
 #define N_COL  3
 
@@ -40,12 +46,23 @@ public:
 	     CollectedData();
 	  };
 
+	 struct MyPacket {
+	   int id;
+	   int value;
+	   MyPacket();
+	 };
+
 	  struct Opinion {
-		 UInt32 actualOpinion;
-	     UInt32 countedCellOfActualOpinion;
-	     Real quality;
-	     CColor actualOpCol;
-	     Opinion();
+	    UInt32 actualOpinion;
+	    UInt32 countedCellOfActualOpinion;
+	    Real quality;
+	    double mean;
+	    double delta;
+	    double delta2;
+	    double M2;
+	    double se;	    
+	    CColor actualOpCol;
+	    Opinion();
 	  };
 
 	  // Random walk
@@ -62,29 +79,25 @@ public:
 	    Real sigma;
 	    bool exitFlag;
 	    bool profiling;
-	    bool useMultipleNodes;
-	    bool useBackgroundGethCalls;
+	    bool useLac;
+	    bool sybilAttack;
+	    bool floodingAttack;
+	    bool replayAttack;
 	    std::string radix;
 	    std::string baseDir; /* Basedir of the controller folder */
-	    std::string interfacePath;
-	    std::string mappingPath;
-	    std::string regenerateFile;
-	    //	    std::string mappingByzantinePath;
-	    std::string blockchainPath;
 	    std::string datadirBase;
-	    int basePort;
-	    //	    int numByzantine;
 	    UInt32 numPackSaved;
+	    int maxStoredOpinions;
 	    UInt32 status;
-	    UInt32 LAMDA, turn;
-	    bool useClassicalApproach;
+	    UInt32 LAMBDA, turn;
 	    UInt32 numRobots; /* total amount of robots in the experiment */
-	     void Init(TConfigurationNode& t_node);
+	    void Init(TConfigurationNode& t_node);
 	  };
 
 	  struct SStateData {
 
-		  /* For variables for the time of the states because two of them are decreased to count the time
+		  /* For variables for the time of the states because t
+wo of them are decreased to count the time
 		   * steps spent in that state and the other two are used to keep track of the duration times, for
 		   * record the statistics.
 		   */
@@ -109,10 +122,8 @@ public:
    virtual void RandomWalk();
    virtual void Reset() {};
    void fromLoopFunctionResPrepare();
-   void fromLoopFunctionResStart();
    void Explore();
    void Diffusing();   
-   void Listening();
    void Move();
    void TurnLeds();
    Real ExponentialFormula(Real mean){
@@ -140,18 +151,6 @@ public:
       return opinion;
    }
 
-   inline std::string & GetAddress() {
-      return address;
-   }
-
-   inline std::string & GetMinerAddress() {
-      return minerAddress;
-   }
-
-   inline bool isMining() {
-     return mining;
-   }
-   
    inline bool IsExploring() const {
       return m_sStateData.State == SStateData::STATE_EXPLORING;
    }
@@ -159,31 +158,23 @@ public:
       return m_sStateData.State == SStateData::STATE_DIFFUSING;
    }
 
-   inline std::string getEnode()  {
-     return enode;
-   }
-
    inline int getNodeInt() {
      return nodeInt;
-   }
-
-   inline void setContractAddress(std::string contractAddr) {
-     contractAddress = contractAddr;
    }
 
    inline int getByzantineStyle() {
      return byzantineStyle;
    }
 
-   inline std::string getVoteInformation() {
-     return voteInformation;
+   inline double getTotalQuality() {
+     return totalQuality;
    }
-   
 
-   inline void setVoteInformation(std::string v) {
-     voteInformation = v;
+   inline int getNumExplorationPhase() {
+     return numExplorationPhase;
    }
-   
+      
+
    inline bool getConsensusReached() {
      return consensusReached;
    }
@@ -192,8 +183,14 @@ public:
      byzantineStyle = style;
    }
    
+   void UpdateNeighbors(std::set<int> newNeighbors);
+
 private:
 
+   void readNodeMapping();
+
+   uint Id2Int(std::string id);
+   
    CCI_EPuckWheelsActuator* m_pcWheels;
    Real m_fWheelVelocity;
    CCI_EPuckRangeAndBearingActuator*  m_pcRABA;
@@ -215,27 +212,26 @@ private:
    CollectedData collectedData;
    Opinion opinion;
    Movement movement;
+
    int initializationValues[N_COL];
-   std::string address;
-   std::string minerAddress;
-   std::string contractAddress;
-   std::string rawTx;
    std::set<int> neighbors;
-   std::string enode;
-   std::string blockchainPath;
-   blockWithHash bwh;
+
    bool beginning;
    int nodeInt;
    std::map<int, int> robotIdToNode;  
-   bool mining;
    int byzantineStyle;
-   bool threadCurrentlyRunning;
-   int eventTrials;
-   std::string voteInformation;
    bool consensusReached;
-   bool receivedDecision; // Indicates if the robots already received a new opinion from the smart contract (for multi threading)
-   CColor red, blue, green;                    // Add here eventual additional color AGGIUNGERECOLORI
-//   int totalCounted, countedOfThisOpinion[N_COL];  USED JUST FOR STATISTICS, no more used
+   double currentQuality;
+   int numExplorationPhase;
+   double totalQuality;
+   CColor red, blue, green;
+   UInt8 explorationCounter;
+   std::vector<int> receivedPackets;
+   int currentPosition;
+   UInt32 totalOpinionsReceived;
+   bool alreadyReceived[256];
+
+   
 };
 
 #endif
