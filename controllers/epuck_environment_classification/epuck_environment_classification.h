@@ -73,13 +73,12 @@ public:
 	  };
 
 	  struct SimulationState {
-	    UInt32 decision_rule;
+	    UInt32 decisionRule;
 	    Real percentRed, percentBlue;
 	    Real g;
 	    Real sigma;
 	    bool exitFlag;
 	    bool profiling;
-	    bool useLac;
 	    bool sybilAttack;
 	    bool floodingAttack;
 	    bool replayAttack;

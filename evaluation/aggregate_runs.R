@@ -4,28 +4,27 @@ source("myplothelpers.R")
 ## Volker Strobel
 ## This script creates the plots for the ANTS 2018 paper
 
-
-difficulties <- c(34, 36, 38, 40, 42, 44, 46, 48)
+##difficulties <- c(34, 36, 38, 40, 42, 44, 46, 48)
+difficulties <- c(10, 20, 30, 40, 50, 60, 70, 80, 90)
 num.byz <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
 style <- "blockchain"
 nodes <- 0
 
 do.experiment1 <- TRUE
 
-dates.bc.exp1 <- c("26-08-2018")
+dates.bc.exp1 <- c("09-09-2018")
 
 dates.exp1 <- dates.bc.exp1
 dates.exp2 <- dates.bc.exp2
 dates.exp3 <- dates.bc.exp3
 
 data.base <- "/Users/volkerstrobel/Documents/mygithub-software/blockchain-journal/data/"
-
-report.dir <- "."
+report.dir <- "MIT_data/"
 N = 20
 
 
 # Experiment 1 (Increasing difficulty)
-create.df.exp1 <- function(max.trials=5) {
+create.df.exp1 <- function(max.trials=10, dec=1, mixing="true", byzstyle=5) {
     df.1 <- data.frame()
     a <- list()
         for (dat in dates.exp1) {
@@ -33,13 +32,13 @@ create.df.exp1 <- function(max.trials=5) {
                 for (d in difficulties) {
                     for (node in nodes){
 
-                        trials.name <- sprintf("%s/experiment1_decision1-node%d-%s/140000/num20_black%d_byz0_run%d.RUN1", data.base, node, dat, d, i)
+                        trials.name <- sprintf("%s/experiment1_decision%d_mixing%s_byzstyle%d-node%d-%s/140000/num20_black%d_byz0_run%d.RUN1", data.base, dec, mixing, byzstyle, node, dat, d, i)
 
                        
                         if (file.exists(trials.name)) {
+
                             print(trials.name)
-                            print(df.1)
-                            X <- tryCatch(read.table(trials.name, header=F,sep=","), error=function(e) NULL)
+                            X <- tryCatch(read.table(trials.name, skip = 100, header=F, sep=","), error=function(e) NULL)
 
                             if (nrow(X) != 0 && !is.null(X)) {
 
@@ -99,8 +98,8 @@ create.df.exp2 <- function(max.trials=30) {
 
 
 ## Experiment 3 (Increasing the number of Byzantine robots)
-create.df.exp3 <- function(dates, max.trials=10, safe=T) {
-    d <- 34
+create.df.exp3 <- function(dates, max.trials=10, dec=1, mixing="true", byzstyle=0) {
+    d <- 40
     t <- 140000
     N <- 15
     df <- data.frame(matrix(ncol = 6, nrow = 0))
@@ -110,11 +109,12 @@ create.df.exp3 <- function(dates, max.trials=10, safe=T) {
                 for (b in num.byz) {
                     for (node in nodes){
 #                        trials.name <- sprintf("%s/experiment1_decision1-node%d-%s/140000/num20_black%d_byz%d_run%d.RUN1", data.base, node, dat, d, b, i)
-                        trials.name <- sprintf("%s/experiment1_decision1_uselacfalse_mixingtrue-node%d-%s/140000/num20_black%d_byz%d_run%d.RUN1", data.base, node, dat, d, b, i)
+                        trials.name <- sprintf("%s/experiment1_decision%d_mixing%s_byzstyle%d-node%d-%s/140000/num20_black%d_byz%d_run%d.RUN1", data.base, dec, mixing, byzstyle, node, dat, d, b, i)
+                        print(trials.name)
 
                         if (file.exists(trials.name)) {
 
-                            print(trials.name)
+#                            print(trials.name)
                             
                             X <- tryCatch(read.table(trials.name, sep=",", skip = 100, header=F), error=function(e) NULL)
                             if (nrow(X) != 0 && !is.null(X)){
@@ -157,6 +157,7 @@ data_summary <- function(data, varname, groupnames){
 }
 
 df1 <- create.df.exp1() ## Iterate over runs and create big df
+
 sum <- data_summary(df1, "predicted", "actual")
 #df <- df[df$clock < 1000, ]
 
@@ -169,21 +170,28 @@ df2$absError <- abs(df2$error)
 df2$squaredError <- df2$error * df2$error
 
 
-dates.bc.exp3.secure <- c("26-08-2018", "27-08-2018") ## uniformly random field
+dates.bc.exp3.secure <- c("10-09-2018") ## uniformly random field
+byzstyle=1
+report.dir <- "MIT_data_W-MSR_mixingtrue/"
+df3.safe <- create.df.exp3(dates=dates.bc.exp3.secure, dec=2, byzstyle=byzstyle, mixing="true") ## Iterate over runs and create big df
 
-
-dates.bc.exp3.secure <- c("28-08-2018") ## binary field
-
-df3.safe <- create.df.exp3(dates=dates.bc.exp3.secure, safe=T) ## Iterate over runs and create big df
-
+                                        #df3.safe <- read.csv("/Users/volkerstrobel/Documents/mypapers/2018-ANTS/data/experiment3_secure_ants2018.csv")
 df3.safe.agg <- data_summary(df3.safe, varname="cons.time", groupnames = c("byz"))
-
-
-df3.safe <- df3.safe[df3.safe$byz < 10, ]
+#df3.safe <- df3.safe[df3.safe$byz < 10, ]
 df3.safe$error <- df3.safe$actual - df3.safe$predicted
 df3.safe$absError <- abs(df3.safe$error)
 df3.safe$squaredError <- df3.safe$error * df3.safe$error
 df3.safe$consWhite <- df3.safe$predicted < 0.5
+
+
+## Experiment 3 safe
+source("myplothelpers.R")
+plot.MAE.by.byz.gg(df3.safe,
+                  xlab=expression("Number of Byzantine robots (k)"),
+                  ylab=expression("Mean absolute error"),
+                  sprintf("MAE_byz-secure-byzstyle%d.pdf", byzstyle),
+                  report.dir) 
+
 
 
 df3.nonsafe <- create.df.exp3(dates=dates.bc.exp3.nonsecure, safe=F) ## Iterate over runs and create big df
@@ -300,10 +308,3 @@ plot.MAE.by.byz.gg(df3.nonsafe,
                   report.dir) 
 
 
-## Experiment 3 safe
-source("myplothelpers.R")
-plot.MAE.by.byz.gg(df3.safe,
-                  xlab=expression("Number of Byzantine robots (k)"),
-                  ylab=expression("Mean absolute error"),
-                  sprintf("MAE_byz-secure.pdf"),
-                  report.dir) 

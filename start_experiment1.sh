@@ -11,9 +11,11 @@ MINERID=$(expr 120 + $1)
 echo "MINERID is ${MINERID}"
 NUMROBOTS=(20)
 THRESHOLDS=(140000) 
-REPETITIONS=10
+REPETITIONS=20
+# Decision rule 1: LAC
+# Decision rule 2: W-MSR
 DECISIONRULE=$3
-PERCENT_BLACKS=(34)
+PERCENT_BLACKS=(40)
 MININGDIFF=1000000
 USEMULTIPLENODES=true
 USEBACKGROUNDGETHCALLS=true
@@ -30,16 +32,28 @@ REGENERATEFILE="$(pwd)/regenerate${USEDNODES[0]}.sh"
 # The miner node is the first of the used nodes
 MINERNODE=${USEDNODES[0]}
 USECLASSICALAPPROACH=true
-NUMBYZANTINE=(9)
-BYZANTINESWARMSTYLE=1
-USELAC="false" # use LAC or W-MSR  
-MIXING="true" # mix or tiles or just have a binary field
+NUMBYZANTINE=(0 1 2 3 4 5)
+## Byzantine styles
+# 1: Always send 0.0 as value
+# 2: Always send 1.0 as value
+# 3: Send 0.0 with probabiity 0.5, send 1.0 else
+# 4: Send a random number between 0.0 and 1.0
+# 5: Send the true value but apply Gaussian noise to the sensor readings
+# 11: Perform a Sybil and flooding attack, always send 0.0 as value
+# 12: Perform a Sybil and flooding attack, always send 1.0 as value
+# 13: Perform a Sybil and flooding attack, send 0.0 with probabiity 0.5, send 1.0 else
+# 14: Perform a Sybil and flooding attack, send a random number between 0.0 and 1.0
+# 15: Perform a Sybil and flooding attack, send the true value but with some Gaussian noise
+# 20: Perform a jamming attack
+
+DETERMINECONSENSUS="false"
+BYZANTINESWARMSTYLES=(1)
+MIXINGS=("true") # mix or tiles or just have a binary field
 REPLAYATTACK="false"
 SYBILATTACK="false"
 FLOODINGATTACK="true"
 SUBSWARMCONSENSUS=false # Determines if all N robots have to agree or
 		       # only the beneficial subswarm.
-DATADIRBASE="data/experiment1_decision${DECISIONRULE}_flooding${FLOODINGATTACK}_uselac${USELAC}_mixing${MIXING}-node$1-${NOW}/"
 
 if [ "$USECLASSICALAPPROACH" == "true" ]; then
     REALTIME="false"
@@ -55,11 +69,16 @@ fi
  # Iterate over experimental settings and start experiments
  
  for i in `seq 1 $REPETITIONS`; do
-
-     for y in "${NUMBYZANTINE[@]}"; do
+     
+     for MIXING in "${MIXINGS[@]}"; do
+     
+	 for y in "${NUMBYZANTINE[@]}"; do
 
 	 for THRESHOLD in "${THRESHOLDS[@]}"; do
 
+	     for BYZANTINESWARMSTYLE in "${BYZANTINESWARMSTYLES[@]}"; do
+
+		 DATADIRBASE="data/experiment1_decision${DECISIONRULE}_mixing${MIXING}_byzstyle${BYZANTINESWARMSTYLE}-node$1-${NOW}/"
 
 	     DATADIR="${DATADIRBASE}${THRESHOLD}/"
 	     mkdir -p $DATADIR
@@ -103,7 +122,7 @@ fi
 	RADIX=$(printf 'num%d_black%d_byz%d_run%d' $k $PERCENT_BLACK $y $i)
 	
 	# Create template
-	sed -e "s|BASEDIR|$BASEDIR|g" -e "s|NUMRUNS|$NUMRUNS|g" -e "s|DATADIR|$DATADIR|g" -e "s|RADIX|$RADIX|g" -e "s|NUMROBOTS|$k|g" -e "s|R0|$R0|g" -e "s|B0|$B0|g" -e "s|PERCENT_BLACK|$PERCENT_BLACK|g" -e "s|PERCENT_WHITE|$PERCENT_WHITE|g" -e "s|DECISIONRULE|$DECISIONRULE|g" -e "s|USEMULTIPLENODES|$USEMULTIPLENODES|g" -e "s|MININGDIFF|$MININGDIFF|g" -e "s|MINERNODE|$MINERNODE|g" -e "s|MINERID|$MINERID|g" -e "s|BASEPORT|$BASEPORT|g" -e "s|USEBACKGROUNDGETHCALLS|$USEBACKGROUNDGETHCALLS|g" -e "s|BLOCKCHAINPATH|$BLOCKCHAINPATH|g" -e "s|MAPPINGPATH|$MAPPINGPATH|g" -e "s|THREADS|$THREADS|g" -e "s|USECLASSICALAPPROACH|$USECLASSICALAPPROACH|g" -e "s|NUMBYZANTINE|$y|g" -e "s|BYZANTINESWARMSTYLE|$BYZANTINESWARMSTYLE|g" -e "s|SUBSWARMCONSENSUS|$SUBSWARMCONSENSUS|g" -e "s|REGENERATEFILE|$REGENERATEFILE|g" -e "s|REALTIME|$REALTIME|g" -e "s|USELAC|$USELAC|g" -e "s|MIXING|$MIXING|g" -e "s|SYBILATTACK|$SYBILATTACK|g" -e "s|FLOODINGATTACK|$FLOODINGATTACK|g" -e "s|REPLAYATTACK|$REPLAYATTACK|g" $TEMPLATE > $OUTFILE
+	sed -e "s|BASEDIR|$BASEDIR|g" -e "s|NUMRUNS|$NUMRUNS|g" -e "s|DATADIR|$DATADIR|g" -e "s|RADIX|$RADIX|g" -e "s|NUMROBOTS|$k|g" -e "s|R0|$R0|g" -e "s|B0|$B0|g" -e "s|PERCENT_BLACK|$PERCENT_BLACK|g" -e "s|PERCENT_WHITE|$PERCENT_WHITE|g" -e "s|DECISIONRULE|$DECISIONRULE|g" -e "s|USEMULTIPLENODES|$USEMULTIPLENODES|g" -e "s|MININGDIFF|$MININGDIFF|g" -e "s|MINERNODE|$MINERNODE|g" -e "s|MINERID|$MINERID|g" -e "s|BASEPORT|$BASEPORT|g" -e "s|USEBACKGROUNDGETHCALLS|$USEBACKGROUNDGETHCALLS|g" -e "s|BLOCKCHAINPATH|$BLOCKCHAINPATH|g" -e "s|MAPPINGPATH|$MAPPINGPATH|g" -e "s|THREADS|$THREADS|g" -e "s|USECLASSICALAPPROACH|$USECLASSICALAPPROACH|g" -e "s|NUMBYZANTINE|$y|g" -e "s|BYZANTINESWARMSTYLE|$BYZANTINESWARMSTYLE|g" -e "s|SUBSWARMCONSENSUS|$SUBSWARMCONSENSUS|g" -e "s|REGENERATEFILE|$REGENERATEFILE|g" -e "s|REALTIME|$REALTIME|g" -e "s|MIXING|$MIXING|g" -e "s|SYBILATTACK|$SYBILATTACK|g" -e "s|FLOODINGATTACK|$FLOODINGATTACK|g" -e "s|REPLAYATTACK|$REPLAYATTACK|g" -e "s|DETERMINECONSENSUS|$DETERMINECONSENSUS|g" $TEMPLATE > $OUTFILE
 	
 	# Start experiment
 	argos3 -c $OUTFILE
@@ -121,9 +140,13 @@ fi
 	
 	 done
 	     done
-	 
+	     
+	     done
+	     
 	 done
-    
+
+	 done
+
      done
 
 

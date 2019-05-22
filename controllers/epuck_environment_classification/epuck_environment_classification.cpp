@@ -64,7 +64,7 @@ void EPuck_Environment_Classification::SimulationState::Init(TConfigurationNode&
     GetNodeAttribute(t_node, "sigma", sigma);
     GetNodeAttribute(t_node, "lambda", LAMBDA);
     GetNodeAttribute(t_node, "turn", turn);
-    GetNodeAttribute(t_node, "decision_rule", decision_rule);
+    GetNodeAttribute(t_node, "decision_rule", decisionRule);
     GetNodeAttribute(t_node, "exitFlag", exitFlag);
     GetNodeAttribute(t_node, "percent_white", percentRed);
     GetNodeAttribute(t_node, "percent_black", percentBlue);
@@ -72,7 +72,6 @@ void EPuck_Environment_Classification::SimulationState::Init(TConfigurationNode&
     GetNodeAttribute(t_node, "base_dir", baseDir);
     GetNodeAttribute(t_node, "profiling", profiling);
     GetNodeAttribute(t_node, "max_stored_opinions", maxStoredOpinions);
-    GetNodeAttribute(t_node, "use_lac", useLac);
     GetNodeAttribute(t_node, "sybil_attack", sybilAttack);
     GetNodeAttribute(t_node, "flooding_attack", floodingAttack);
     GetNodeAttribute(t_node, "replay_attack", replayAttack);
@@ -233,22 +232,25 @@ void EPuck_Environment_Classification::Explore() {
     /* Send estimates to other robots  */
     CCI_EPuckRangeAndBearingActuator::TData toSend;
     toSend[0] = Id2Int(GetId());
+    toSend[3] = 0;
     double totalQualityRounded = roundf(totalQuality * 100);
-    
+
     if (numExplorationPhase > 2) {
       toSend[1] = (int) (totalQualityRounded);
       toSend[2] = 1;
     }
 
-    if (byzantineStyle == 1) {
+    /* Different forms of attacks */
+
+    if (byzantineStyle == 1 || byzantineStyle == 11) {
       toSend[1] = 0;
     } 
 
-    if (byzantineStyle == 2) {
+    if (byzantineStyle == 2 || byzantineStyle == 12) {
       toSend[1] = 1;
     }
 
-    if (byzantineStyle == 3) {
+    if (byzantineStyle == 3 || byzantineStyle == 13) {
       CRange<Real> zeroOne(0.0,1.0);
       Real p = m_pcRNG->Uniform(zeroOne);
       if (p > 0.5) {
@@ -258,12 +260,24 @@ void EPuck_Environment_Classification::Explore() {
 	toSend[1] = 1;
       }
     }
+
+    if (byzantineStyle == 4 || byzantineStyle == 14) {
+      CRange<Real> zeroOne(0.0,1.0);
+      Real p = m_pcRNG->Uniform(zeroOne);
+      double totalByzQualityRounded = roundf(p * 100);
+      toSend[1] = (int) (totalByzQualityRounded);
+    }
     
-    if (byzantineStyle > 0 && simulationParams.floodingAttack) {
+    if (byzantineStyle > 10 && byzantineStyle < 20) {
       /* Generate a random identity to steal identity from someone */
       CRange<UInt32> zero255(0, 255);
       UInt32 randomIdentity = m_pcRNG->Uniform(zero255);
       toSend[0] = randomIdentity;
+    }
+
+    /* Jamming attack */
+    if (byzantineStyle ==  20) {
+      toSend[3] = 1;
     }
 
     m_pcRABA->SetData(toSend);
@@ -277,8 +291,13 @@ void EPuck_Environment_Classification::Explore() {
   const CCI_EPuckRangeAndBearingSensor::TPackets& tPackets = m_pcRABS->GetPackets();
   
   /* Determine how many non-initialized messages there are*/
+  bool containedJammer = false;
+  
   for(size_t i = 0; i < tPackets.size() ; ++i) {
 
+    if (tPackets[i]->Data[3] == 1)
+      containedJammer = true;
+    
     /* Check if it is initialized and if a opinion of this robot was
        already received */
     if (tPackets[i]->Data[2] == 1 && !alreadyReceived[tPackets[i]->Data[0]]) {
@@ -290,7 +309,10 @@ void EPuck_Environment_Classification::Explore() {
       currentPosition = (currentPosition + 1) % simulationParams.maxStoredOpinions;
       }
   }
-  
+
+  if (containedJammer)
+    receivedPackets.clear();
+      
   m_pcRABS->ClearPackets();
   
 }
@@ -307,15 +329,30 @@ void EPuck_Environment_Classification::Diffusing() {
   /* Own estimate of this exploration phase */
   opinion.quality = (Real)((Real)(opinion.countedCellOfActualOpinion) / (Real)(collectedData.count));
 
+  /* Add some noise to the sensor */
+  if (byzantineStyle == 5 || byzantineStyle == 15) {
+    Real p = m_pcRNG->Gaussian(0.05, 0.0);
+    opinion.quality += p;
+
+    /* Constraint it between 0.0 and 1.0 */
+    if (opinion.quality > 1.0)
+      opinion.quality = 1.0;
+
+    if (opinion.quality < 0.0)
+      opinion.quality = 0.0;
+    
+  }
+    
+
   vector<int> msgs;
   vector<int> smaller_than;
   vector<int> greater_than;
   vector<int> msgs_cleaned;
 
 
-  if (simulationParams.useLac) {
+  if (simulationParams.decisionRule == 1) {
     msgs_cleaned = receivedPackets;
-  } else {
+  } else if (simulationParams.decisionRule == 2) {
 
     /* Apply W-SR */
 
@@ -334,8 +371,7 @@ void EPuck_Environment_Classification::Diffusing() {
 	/* ...put into greater than array */
 	greater_than.push_back(*it);
     }
-    
-    
+        
     if (greater_than.size() < F) {
       greater_than.clear();
     } else {
@@ -351,6 +387,9 @@ void EPuck_Environment_Classification::Diffusing() {
     msgs_cleaned.reserve( greater_than.size() + smaller_than.size() ); // preallocate memory
     msgs_cleaned.insert( msgs_cleaned.end(), greater_than.begin(), greater_than.end() );
     msgs_cleaned.insert( msgs_cleaned.end(), smaller_than.begin(), smaller_than.end() );
+  } else {
+    /* Unimplemented decision rule */
+    THROW_ARGOSEXCEPTION("Unimplemented decision rule");
   }
   
   double weight = 1.0 / (msgs_cleaned.size() + 1);  
@@ -477,6 +516,7 @@ void EPuck_Environment_Classification::fromLoopFunctionResPrepare(){
   toSend[0] = Id2Int(GetId());
   toSend[1] = totalQuality;
   toSend[2] = 0; /* 0: robot has not explored yet; 1: robot has explored */
+  toSend[3] = 0; /* 0: robot has not explored yet; 1: robot has explored */
   m_pcRABA->SetData(toSend);
   m_pcRABS->ClearPackets();
   TurnLeds();

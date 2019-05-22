@@ -76,6 +76,7 @@ void CEnvironmentClassificationLoopFunctions::fillSettings(TConfigurationNode& t
       GetNodeAttribute(tEnvironment, "subswarm_consensus", subswarmConsensus);
       GetNodeAttribute(tEnvironment, "length_of_runs", lengthOfRuns);
       GetNodeAttribute(tEnvironment, "color_mixing", colorMixing);
+      GetNodeAttribute(tEnvironment, "determine_consensus", determineConsensus);
     }
   catch(CARGoSException& ex) {
     THROW_ARGOSEXCEPTION_NESTED("Error parsing loop functions!", ex);
@@ -693,12 +694,14 @@ void CEnvironmentClassificationLoopFunctions::PreStep() {
 	  
 	  cout << "max is " << max << endl;
 	  cout << "min is " << min << endl;
-	  
-	  if (abs(max - min) < epsilon)
-	    consensusReached = 100;
+
+	  if (determineConsensus) {
+	    if (abs(max - min) < epsilon)
+	      consensusReached = 100;
 	  }
-
-
+	}
+	
+	
 	cout << "u1 was " << u1 << endl;
 	cout << "u2 was " << u2 << endl;
 	//everyTicksFile << avgNonByzTotalQuality;

@@ -56,7 +56,6 @@
 			       regenerate_file="REGENERATEFILE"
 			       percent_black="PERCENT_BLACK"
 			       max_stored_opinions="20"
-			       use_lac="USELAC"
 			       sybil_attack="SYBILATTACK"
 			       flooding_attack="FLOODINGATTACK"
 			       replay_attack="REPLAYATTACK"/> <!-- Sigma and G must be inserted in seconds, not in ticks; 
@@ -92,7 +91,7 @@
 	  r_0="0"
 	  w_0="R0"
 	  b_0="B0"	  
-	  length_of_runs="5000"
+	  length_of_runs="450"
 	  g="10"
 	  sigma="10"
 	  lambda="100"
@@ -106,7 +105,8 @@
 	  subswarm_consensus="SUBSWARMCONSENSUS"
 	  regenerate_file="REGENERATEFILE"
 	  blockchain_path="BLOCKCHAINPATH"
-	  color_mixing="MIXING"/>
+	  color_mixing="MIXING"
+	  determine_consensus="DETERMINECONSENSUS"/>
 
   </loop_functions>
   <!-- *********************** -->

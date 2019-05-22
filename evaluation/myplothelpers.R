@@ -168,8 +168,8 @@ plot.error.gg <- function(df, xlab, ylab, out.name, report.dir) {
               axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")))  +
         ylab(ylab) +
         xlab(xlab) +
-        base_breaks_y(seq(0.32, 0.48, 0.02)) +
-        base_breaks_x(seq(0.32, 0.48, 0.02)) 
+        base_breaks_y(seq(0.10, 0.90, 0.10)) +
+        base_breaks_x(seq(0.10, 0.90, 0.10)) 
         
     print(paste0(report.dir, out.name))
     ggsave(out.name, width=7, height=4)    
@@ -287,7 +287,7 @@ plot.error.by.byz.gg <- function(df, xlab, ylab, out.name, report.dir) {
 plot.MAE.by.byz.gg <- function(df, xlab, ylab, out.name, report.dir) {
     p <- ggplot(df, aes(x=byz, y=absError)) +
         geom_boxplot(aes(group = byz)) +
-                geom_smooth(method="lm") +
+                geom_smooth(method="loess") +
                 geom_abline(slope = 0, lty = 2) + 
          theme_classic() +
          theme(axis.text=element_text(size=15, colour="gray25"),
@@ -303,8 +303,8 @@ plot.MAE.by.byz.gg <- function(df, xlab, ylab, out.name, report.dir) {
               axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")))  +
         ylab(ylab) +
         xlab(xlab) +
-        base_breaks_y(seq(0.00, 0.36, 0.04)) +
-        base_breaks_x(seq(0, 9, 1))         
+        base_breaks_y(seq(0.00, 0.60, 0.04)) +
+        base_breaks_x(seq(0, 5, 1))         
 
     out.name <- paste0(report.dir, out.name)
     print(out.name)
