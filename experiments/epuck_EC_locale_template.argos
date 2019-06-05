@@ -40,7 +40,7 @@
    			       sigma="10"
 			       turn="4"
 			       lambda="10"
-			       exploration_time="30"
+			       exploration_time="45"
 			       exitFlag="true"
 			       profiling="true"
 			       decision_rule="DECISIONRULE"
