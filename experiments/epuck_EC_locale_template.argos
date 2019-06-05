@@ -9,7 +9,7 @@
     <system threads="THREADS" />
 
     <experiment length="0"
-                ticks_per_second="10"
+                ticks_per_second="1"
 		real_time="REALTIME"
                 random_seed="0" />
 
@@ -21,7 +21,7 @@
 <controllers>
 
     <epuck_environment_classification_controller id="epc"
-     library="/Users/volkerstrobel/Documents/mygithub-software/blockchain-journal/build/controllers/epuck_environment_classification/libepuck_environment_classification">
+     library="./build/controllers/libcontrollers">
      
       <actuators>
 	<epuck_wheels implementation="default" />
@@ -38,24 +38,17 @@
    
      	<simulation_parameters g="10" 
    			       sigma="10"
-			       turn="45"
-			       lambda="100"
+			       turn="4"
+			       lambda="10"
+			       exploration_time="30"
 			       exitFlag="true"
 			       profiling="true"
 			       decision_rule="DECISIONRULE"
 			       num_pack_saved="20"
+			       max_stored_opinions="20"			       
 			       percent_white="PERCENT_WHITE"
+			       percent_black="PERCENT_BLACK"			       
 			       base_dir="BASEDIR"
-			       use_multiple_nodes="USEMULTIPLENODES"
-			       use_background_geth_calls="USEBACKGROUNDGETHCALLS"
-			       interface_path="interface.txt"
-			       mapping_path="MAPPINGPATH"
-			       base_port="BASEPORT"
-			       blockchain_path="BLOCKCHAINPATH"
-			       use_classical_approach="USECLASSICALAPPROACH"
-			       regenerate_file="REGENERATEFILE"
-			       percent_black="PERCENT_BLACK"
-			       max_stored_opinions="20"
 			       sybil_attack="SYBILATTACK"
 			       flooding_attack="FLOODINGATTACK"
 			       replay_attack="REPLAYATTACK"/> <!-- Sigma and G must be inserted in seconds, not in ticks; 
@@ -64,7 +57,7 @@
       </params>
     </epuck_environment_classification_controller>
   </controllers>
- <loop_functions  library="/Users/volkerstrobel/Documents/mygithub-software/blockchain-journal/build/loop_functions/environment_classification_loop_functions/libenvironment_classification_loop_functions"
+ <loop_functions  library="./build/loop_functions/libenvironment_classification_loop_functions"
                   label="environment_classification_loop_functions">
 
   <cells  number_of_red_cells="0"
@@ -96,15 +89,10 @@
 	  sigma="10"
 	  lambda="100"
 	  turn="45"
-	  miningdiff="MININGDIFF"
 	  decision_rule="DECISIONRULE"
-	  base_port="BASEPORT"
-	  use_classical_approach="USECLASSICALAPPROACH"
 	  num_byzantine="NUMBYZANTINE"
 	  byzantine_swarm_style="BYZANTINESWARMSTYLE"
 	  subswarm_consensus="SUBSWARMCONSENSUS"
-	  regenerate_file="REGENERATEFILE"
-	  blockchain_path="BLOCKCHAINPATH"
 	  color_mixing="MIXING"
 	  determine_consensus="DETERMINECONSENSUS"/>
 

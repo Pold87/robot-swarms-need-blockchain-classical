@@ -6,10 +6,10 @@
   <!-- ************************* -->
   <framework>
    
-    <system threads="20" />
+    <system threads="0" />
 
     <experiment length="0"
-                ticks_per_second="10"
+                ticks_per_second="1"
 		real_time="false"
                 random_seed="0" />
 
@@ -21,12 +21,12 @@
 <controllers>
 
     <epuck_environment_classification_controller id="epc"
-     library="/Users/volkerstrobel/Documents/mygithub-software/blockchain-journal/build/controllers/epuck_environment_classification/libepuck_environment_classification">
+     library="./build/controllers/libcontrollers">
      
       <actuators>
 	<epuck_wheels implementation="default" />
         <leds implementation="default" medium="leds" />
-        <epuck_range_and_bearing implementation="medium" medium="rab" range="0.22" />
+        <epuck_range_and_bearing implementation="medium" medium="rab" range="0.50" />
       </actuators>
       <sensors>
         <!--epuck_motor_ground implementation="rot_z_only" /-->
@@ -38,72 +38,63 @@
    
      	<simulation_parameters g="10" 
    			       sigma="10"
-			       turn="45"
-			       lambda="100"
+			       turn="4"
+			       lambda="10"
+			       exploration_time="30"
 			       exitFlag="true"
 			       profiling="true"
-			       decision_rule=""
-			       num_pack_saved="2"
-			       percent_white="66"
-			       base_dir="/Users/volkerstrobel/Documents/blockchain-journal/controllers/epuck_environment_classification/"
-			       use_multiple_nodes="true"
-			       use_background_geth_calls="true"
-			       interface_path="interface.txt"
-			       mapping_path="/Users/volkerstrobel/Documents/blockchain-journal/experiments/config.txt"
-			       base_port=""
-			       blockchain_path="/Users/volkerstrobel/eth_data_para/data"
-			       use_classical_approach="true"
-			       regenerate_file="/Users/volkerstrobel/Documents/mygithub-software/blockchain-journal/regenerate.sh"
-			       percent_black="34"/> <!-- Sigma and G must be inserted in seconds, not in ticks; 
+			       decision_rule="2"
+			       num_pack_saved="20"
+			       max_stored_opinions="20"			       
+			       percent_white="90"
+			       percent_black="10"			       
+			       base_dir="/Users/volkerstrobel/Documents/mypapers/2019-frontiers/code/linear_consensus/controllers/epuck_environment_classification/"
+			       sybil_attack="false"
+			       flooding_attack="true"
+			       replay_attack="false"/> <!-- Sigma and G must be inserted in seconds, not in ticks; 
 							  1 = Voter model; 2 = Direct comparison; 3 = Majority Rule-->
  
       </params>
     </epuck_environment_classification_controller>
   </controllers>
- <loop_functions  library="/Users/volkerstrobel/Documents/mygithub-software/blockchain-journal/build/loop_functions/environment_classification_loop_functions/libenvironment_classification_loop_functions"
+ <loop_functions  library="./build/loop_functions/libenvironment_classification_loop_functions"
                   label="environment_classification_loop_functions">
 
   <cells  number_of_red_cells="0"
-	  base_dir_loop="/Users/volkerstrobel/Documents/blockchain-journal/controllers/epuck_environment_classification/"
-	  data_dir="data/experiment1_decision-node-13-08-2018/140000/"
+	  base_dir_loop="/Users/volkerstrobel/Documents/mypapers/2019-frontiers/code/linear_consensus/controllers/epuck_environment_classification/"
+	  data_dir="raw_data/experiment1_decision2_mixingtrue_byzstyle11-29-05-2019//"
           number_of_white_cells="0"
 	  number_of_black_cells="0"
 	  using_percentage="true"
-	  percent_white="66"
+	  percent_white="90"
 	  exit="true"            
-	  percent_black="34"
+	  percent_black="10"
 	  percent_red="0"
-	  save_every_ticks="10000000"
-	  save_every_ticks_flag="false"
+	  save_every_ticks="10"
+	  save_every_ticks_flag="true"
 	  save_every_run_flag="true"
 	  save_blockchain_flag="true"
 	  save_every_robot_flag="false"
-	  save_every_quality_flag="false"
+	  save_every_quality_flag="true"
 	  save_global_stat_flag="false"
-	  radix="num4_black34_byz0_run2"
-	  number_of_robots="4"
+	  radix="num20_black10_byz9_run10"
+	  number_of_robots="20"
 	  number_of_runs="1"
 	  number_of_qualities="2"
 	  r_0="0"
-	  w_0="4"
+	  w_0="20"
 	  b_0="0"	  
-	  length_of_runs="5000"
+	  length_of_runs="450"
 	  g="10"
 	  sigma="10"
-	  lamda="100"
+	  lambda="100"
 	  turn="45"
-	  miningdiff="1000000"
-	  use_multiple_nodes="true"
-	  miner_id=""
-	  miner_node=""
-	  decision_rule=""
-	  base_port=""
-	  use_classical_approach="true"
-	  num_byzantine="0"
-	  byzantine_swarm_style="0"
+	  decision_rule="2"
+	  num_byzantine="9"
+	  byzantine_swarm_style="11"
 	  subswarm_consensus="false"
-	  regenerate_file="/Users/volkerstrobel/Documents/mygithub-software/blockchain-journal/regenerate.sh"
-	  blockchain_path="/Users/volkerstrobel/eth_data_para/data"/>
+	  color_mixing="true"
+	  determine_consensus="false"/>
 
   </loop_functions>
   <!-- *********************** -->
@@ -133,7 +124,7 @@
    <distribute>
       <position method="uniform" min="0.1,0.1,0" max="1.9 , 1.9, 0" />
       <orientation method="gaussian" mean="1,1,0 " std_dev="360,0,0 " />
-      <entity quantity="4" max_trials="20">
+      <entity quantity="20" max_trials="20">
         <e-puck id="ep" >
           <controller config="epc" />
         </e-puck>
@@ -168,24 +159,24 @@
   <!-- ****************** -->
   <!-- * Visualization * -->
   <!-- ****************** -->
-  <visualization>
-    <qt-opengl>
+  <!-- <visualization> -->
+  <!--   <qt-opengl> -->
        
-      <camera>
-  	<placement idx="0" position="-0.861442,0.985724,1.41504" look_at="-0.179255,0.992546,0.683892" up="0.731109,0.00731134,0.682221" lens_focal_length="20" />
-        <placement idx="1" position="1.94098,0.736798,0.349611" look_at="2.85255,1.04903,0.0821098" lens_focal_length="20" />
-        <placement idx="3" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="4" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="5" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="6" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="7" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="8" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="9" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="10" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="11" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-     </camera>
-      <!-- <user_functions label="environment_classification_qt_user_functions" /> -->
-    </qt-opengl>
-  </visualization>
+  <!--     <camera> -->
+  <!-- 	<placement idx="0" position="-0.861442,0.985724,1.41504" look_at="-0.179255,0.992546,0.683892" up="0.731109,0.00731134,0.682221" lens_focal_length="20" /> -->
+  <!--       <placement idx="1" position="1.94098,0.736798,0.349611" look_at="2.85255,1.04903,0.0821098" lens_focal_length="20" /> -->
+  <!--       <placement idx="3" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="4" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="5" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="6" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="7" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="8" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="9" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="10" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="11" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--    </camera> -->
+  <!--     <!-\- <user_functions label="environment_classification_qt_user_functions" /> -\-> -->
+  <!--   </qt-opengl> -->
+  <!-- </visualization> -->
  
 </argos-configuration>

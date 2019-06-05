@@ -304,7 +304,7 @@ plot.MAE.by.byz.gg <- function(df, xlab, ylab, out.name, report.dir) {
         ylab(ylab) +
         xlab(xlab) +
         base_breaks_y(seq(0.00, 0.60, 0.04)) +
-        base_breaks_x(seq(0, 5, 1))         
+        base_breaks_x(seq(0, 9, 1))         
 
     out.name <- paste0(report.dir, out.name)
     print(out.name)
