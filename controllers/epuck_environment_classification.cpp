@@ -225,7 +225,8 @@ void EPuck_Environment_Classification::Explore() {
     toSend[0] = Id2Int(GetId());
     toSend[3] = 0;
     double totalQualityRounded = roundf(totalQuality * 100);
-
+    cout << "totalQualityRounded = " << totalQualityRounded << endl;
+    
     if (numExplorationPhase > 2) {
       toSend[1] = (int) (totalQualityRounded);
       toSend[2] = 1;
