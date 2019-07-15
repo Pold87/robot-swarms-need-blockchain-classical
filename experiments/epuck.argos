@@ -43,7 +43,7 @@
 			       exploration_time="45"
 			       exitFlag="true"
 			       profiling="true"
-			       decision_rule="1"
+			       decision_rule="2"
 			       num_pack_saved="20"
 			       max_stored_opinions="20"			       
 			       percent_white="75"
@@ -62,7 +62,7 @@
 
   <cells  number_of_red_cells="0"
 	  base_dir_loop="/home/volker/Documents/mypapers/2019-frontiers/code/linear_consensus/controllers/epuck_environment_classification/"
-	  data_dir="raw_data/experiment1_decision1_mixingtrue_byzstyle1-05-06-2019//"
+	  data_dir="raw_data/experiment1_decision2_mixingtrue_byzstyle1-13-06-2019//"
           number_of_white_cells="0"
 	  number_of_black_cells="0"
 	  using_percentage="true"
@@ -77,24 +77,25 @@
 	  save_every_robot_flag="false"
 	  save_every_quality_flag="true"
 	  save_global_stat_flag="false"
-	  radix="num20_black25_byz5_run20"
+	  radix="num20_black25_byz9_eps0.02_run30"
 	  number_of_robots="20"
 	  number_of_runs="1"
 	  number_of_qualities="2"
 	  r_0="0"
 	  w_0="20"
 	  b_0="0"	  
-	  length_of_runs="1000"
+	  length_of_runs="3000"
 	  g="10"
 	  sigma="10"
 	  lambda="100"
 	  turn="45"
-	  decision_rule="1"
-	  num_byzantine="5"
+	  epsilon="0.02"
+	  decision_rule="2"
+	  num_byzantine="9"
 	  byzantine_swarm_style="1"
 	  subswarm_consensus="false"
 	  color_mixing="true"
-	  determine_consensus="false"/>
+	  determine_consensus="true"/>
 
   </loop_functions>
   <!-- *********************** -->

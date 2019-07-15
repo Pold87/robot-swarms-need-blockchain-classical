@@ -77,6 +77,7 @@ void CEnvironmentClassificationLoopFunctions::fillSettings(TConfigurationNode& t
       GetNodeAttribute(tEnvironment, "length_of_runs", lengthOfRuns);
       GetNodeAttribute(tEnvironment, "color_mixing", colorMixing);
       GetNodeAttribute(tEnvironment, "determine_consensus", determineConsensus);
+      GetNodeAttribute(tEnvironment, "epsilon", epsilon);
     }
   catch(CARGoSException& ex) {
     THROW_ARGOSEXCEPTION_NESTED("Error parsing loop functions!", ex);
@@ -630,8 +631,6 @@ void CEnvironmentClassificationLoopFunctions::PreStep() {
 
 	bool within_epsilon = false;
 
-	double epsilon = 0.03;
-
 	vector<double> nonByzantineOpinions; 
 
 	int num_robots = 0;
@@ -672,8 +671,8 @@ void CEnvironmentClassificationLoopFunctions::PreStep() {
 	  double max = *max_element(nonByzantineOpinions.begin(), nonByzantineOpinions.end());
 	  double min = *min_element(nonByzantineOpinions.begin(), nonByzantineOpinions.end());
 	  
-	  cout << "max is " << max << endl;
-	  cout << "min is " << min << endl;
+	  //	  cout << "max is " << max << endl;
+	  //	  cout << "min is " << min << endl;
 
 	  if (determineConsensus) {
 	    if (abs(max - min) < epsilon)
@@ -682,8 +681,8 @@ void CEnvironmentClassificationLoopFunctions::PreStep() {
 	}
 	
 	
-	cout << "u1 was " << u1 << endl;
-	cout << "u2 was " << u2 << endl;
+	//	cout << "u1 was " << u1 << endl;
+	//	cout << "u2 was " << u2 << endl;
 	//everyTicksFile << avgNonByzTotalQuality;
         //everyTicksFile << "," << avgTotalQuality;
 	

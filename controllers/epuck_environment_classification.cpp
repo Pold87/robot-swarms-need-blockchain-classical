@@ -59,8 +59,8 @@ void EPuck_Environment_Classification::SimulationState::Init(TConfigurationNode&
     GetNodeAttribute(t_node, "turn", turn);
     GetNodeAttribute(t_node, "decision_rule", decisionRule);
     GetNodeAttribute(t_node, "exitFlag", exitFlag);
-    GetNodeAttribute(t_node, "percent_white", percentRed);
-    GetNodeAttribute(t_node, "percent_black", percentBlue);
+    GetNodeAttribute(t_node, "percent_white", percentWhite);
+    GetNodeAttribute(t_node, "percent_black", percentBlack);
     GetNodeAttribute(t_node, "num_pack_saved", numPackSaved);
     GetNodeAttribute(t_node, "profiling", profiling);
     GetNodeAttribute(t_node, "max_stored_opinions", maxStoredOpinions);
@@ -105,9 +105,7 @@ void EPuck_Environment_Classification::Init(TConfigurationNode& t_node) {
   // exploration states
   opinion.quality = 0;
   
-  if(simulationParams.percentRed < simulationParams.percentBlue)
-    simulationParams.percentRed = simulationParams.percentBlue;
-  simulationParams.percentRed = simulationParams.percentRed / 100;
+  simulationParams.percentWhite = simulationParams.percentWhite / 100;
 
 }
 
@@ -225,7 +223,6 @@ void EPuck_Environment_Classification::Explore() {
     toSend[0] = Id2Int(GetId());
     toSend[3] = 0;
     double totalQualityRounded = roundf(totalQuality * 100);
-    cout << "totalQualityRounded = " << totalQualityRounded << endl;
     
     if (numExplorationPhase > 2) {
       toSend[1] = (int) (totalQualityRounded);
@@ -414,17 +411,17 @@ void EPuck_Environment_Classification::Diffusing() {
 
   currentQuality = opinion.quality * weight;
 
-  if (Id2Int(GetId()) == 1) {
+  // if (Id2Int(GetId()) == 1) {
 
-    std::ofstream robotOpinion;
+  //   std::ofstream robotOpinion;
     
-    robotOpinion.open("robot1opinion.txt", std::ios_base::out | std::ios_base::app);
+  //   robotOpinion.open("robot1opinion.txt", std::ios_base::out | std::ios_base::app);
 
-    robotOpinion << currentQuality << "," << opinion.countedCellOfActualOpinion << "," << collectedData.count << "," << totalQuality << ","  << endl;
+  //   robotOpinion << currentQuality << "," << opinion.countedCellOfActualOpinion << "," << collectedData.count << "," << totalQuality << ","  << endl;
 
-    robotOpinion.close();
+  //   robotOpinion.close();
     
-  }
+  // }
 
   
 
@@ -438,10 +435,10 @@ void EPuck_Environment_Classification::Diffusing() {
       
     } else {
       totalQuality = totalQuality + (currentQuality - totalQuality) / ((double) numExplorationPhase);
-      cout << "current quality is " << currentQuality << endl;
-      cout << "Total quality is " << totalQuality << endl;
+      //cout << "current quality is " << currentQuality << endl;
+      //cout << "Total quality is " << totalQuality << endl;
       //      cout << "tPackets.size is " << tPackets.size() << endl;
-      cout << "num exp phase" << numExplorationPhase << endl;
+      //cout << "num exp phase" << numExplorationPhase << endl;
     }
 
 

@@ -14,6 +14,7 @@ PERCENT_BLACKS=(25)
 NUMRUNS=1
 THREADS=0
 NOW=`date +"%d-%m-%Y"`
+LENGTHOFRUNS=(1000)
 NUMBYZANTINE=(0 1 2 3 4 5 6 7 8 9)
 ## Byzantine styles
 # 1: Always send 0.0 as value

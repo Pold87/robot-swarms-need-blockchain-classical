@@ -70,7 +70,7 @@ public:
 
 	  struct SimulationState {
 	    UInt32 decisionRule;
-	    Real percentRed, percentBlue;
+	    Real percentWhite, percentBlack;
 	    Real g;
 	    Real sigma;
 	    bool exitFlag;

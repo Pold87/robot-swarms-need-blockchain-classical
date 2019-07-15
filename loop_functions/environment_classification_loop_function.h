@@ -173,6 +173,7 @@ class CEnvironmentClassificationLoopFunctions : public CLoopFunctions {
   double average_total_quality;
   bool colorMixing;
   bool determineConsensus;
+  double epsilon;
 };
 
 
