@@ -14,8 +14,9 @@ PERCENT_BLACKS=(25)
 NUMRUNS=1
 THREADS=0
 NOW=`date +"%d-%m-%Y"`
-LENGTHOFRUNS=(1000)
+EPSILONS=(0.02)
 NUMBYZANTINE=(0 1 2 3 4 5 6 7 8 9)
+LENGTHOFRUNS=(3000)
 ## Byzantine styles
 # 1: Always send 0.0 as value
 # 2: Always send 1.0 as value
@@ -29,7 +30,7 @@ NUMBYZANTINE=(0 1 2 3 4 5 6 7 8 9)
 # 15: Perform a Sybil and flooding attack, send the true value but with some Gaussian noise
 # 20: Perform a jamming attack
 
-DETERMINECONSENSUS="false"
+DETERMINECONSENSUS="true"
 BYZANTINESWARMSTYLES=(1)
 MIXINGS=("true") # mix or tiles or just have a binary field
 REPLAYATTACK="false"
@@ -46,6 +47,7 @@ REALTIME="false"
 	 for y in "${NUMBYZANTINE[@]}"; do
 
 	     for BYZANTINESWARMSTYLE in "${BYZANTINESWARMSTYLES[@]}"; do
+		 for EPSILON in "${EPSILONS[@]}"; do
 
 		 DATADIRBASE="raw_data/experiment1_decision${DECISIONRULE}_mixing${MIXING}_byzstyle${BYZANTINESWARMSTYLE}-${NOW}/"
 
@@ -63,17 +65,18 @@ REALTIME="false"
 			 PERCENT_BLACK=$p
 			 PERCENT_WHITE=$(expr 100 - $PERCENT_BLACK)
 		
-			 RADIX=$(printf 'num%d_black%d_byz%d_run%d' $k $PERCENT_BLACK $y $i)
+			 RADIX=$(printf 'num%d_black%d_byz%d_eps%s_run%d' $k $PERCENT_BLACK $y $EPSILON $i)
 	
 	# Create template
-	sed -e "s|BASEDIR|$BASEDIR|g" -e "s|NUMRUNS|$NUMRUNS|g" -e "s|DATADIR|$DATADIR|g" -e "s|RADIX|$RADIX|g" -e "s|NUMROBOTS|$k|g" -e "s|R0|$R0|g" -e "s|B0|$B0|g" -e "s|PERCENT_BLACK|$PERCENT_BLACK|g" -e "s|PERCENT_WHITE|$PERCENT_WHITE|g" -e "s|DECISIONRULE|$DECISIONRULE|g" -e "s|USEMULTIPLENODES|$USEMULTIPLENODES|g" -e "s|THREADS|$THREADS|g" -e "s|NUMBYZANTINE|$y|g" -e "s|BYZANTINESWARMSTYLE|$BYZANTINESWARMSTYLE|g" -e "s|SUBSWARMCONSENSUS|$SUBSWARMCONSENSUS|g" -e "s|REALTIME|$REALTIME|g" -e "s|MIXING|$MIXING|g" -e "s|SYBILATTACK|$SYBILATTACK|g" -e "s|FLOODINGATTACK|$FLOODINGATTACK|g" -e "s|REPLAYATTACK|$REPLAYATTACK|g" -e "s|DETERMINECONSENSUS|$DETERMINECONSENSUS|g" -e "s|LENGTHOFRUNS|$LENGTHOFRUNS|g" $TEMPLATE > $OUTFILE
+	sed -e "s|BASEDIR|$BASEDIR|g" -e "s|NUMRUNS|$NUMRUNS|g" -e "s|DATADIR|$DATADIR|g" -e "s|RADIX|$RADIX|g" -e "s|NUMROBOTS|$k|g" -e "s|R0|$R0|g" -e "s|B0|$B0|g" -e "s|PERCENT_BLACK|$PERCENT_BLACK|g" -e "s|PERCENT_WHITE|$PERCENT_WHITE|g" -e "s|DECISIONRULE|$DECISIONRULE|g" -e "s|USEMULTIPLENODES|$USEMULTIPLENODES|g" -e "s|THREADS|$THREADS|g" -e "s|NUMBYZANTINE|$y|g" -e "s|BYZANTINESWARMSTYLE|$BYZANTINESWARMSTYLE|g" -e "s|SUBSWARMCONSENSUS|$SUBSWARMCONSENSUS|g" -e "s|REALTIME|$REALTIME|g" -e "s|MIXING|$MIXING|g" -e "s|SYBILATTACK|$SYBILATTACK|g" -e "s|FLOODINGATTACK|$FLOODINGATTACK|g" -e "s|REPLAYATTACK|$REPLAYATTACK|g" -e "s|DETERMINECONSENSUS|$DETERMINECONSENSUS|g" -e "s|EPSILON|$EPSILON|g" -e "s|LENGTHOFRUNS|$LENGTHOFRUNS|g" $TEMPLATE > $OUTFILE
 	
 	# Start experiment
 	argos3 -c $OUTFILE
 		
 		     done
+		 done
 		 done		 
 	     done	     
 	 done	 
      done     
-done
+ done

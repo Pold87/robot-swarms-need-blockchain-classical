@@ -6,11 +6,11 @@
   <!-- ************************* -->
   <framework>
    
-    <system threads="THREADS" />
+    <system threads="0" />
 
     <experiment length="0"
                 ticks_per_second="1"
-		real_time="REALTIME"
+		real_time="true"
                 random_seed="0" />
 
   </framework>
@@ -21,7 +21,7 @@
 <controllers>
 
     <epuck_environment_classification_controller id="epc"
-     library="./build/controllers/libcontrollers">
+     library="./build/controllers/epuck_environment_classification/libepuck_environment_classification">
      
       <actuators>
 	<epuck_wheels implementation="default" />
@@ -38,37 +38,44 @@
    
      	<simulation_parameters g="10" 
    			       sigma="10"
-			       turn="4"
+			       turn="4.5"
 			       lambda="10"
-			       exploration_time="45"
 			       exitFlag="true"
 			       profiling="true"
-			       decision_rule="DECISIONRULE"
+			       decision_rule="1"
 			       num_pack_saved="20"
-			       max_stored_opinions="20"			       
-			       percent_white="PERCENT_WHITE"
-			       percent_black="PERCENT_BLACK"			       
-			       base_dir="BASEDIR"
-			       sybil_attack="SYBILATTACK"
-			       flooding_attack="FLOODINGATTACK"
-			       replay_attack="REPLAYATTACK"/> <!-- Sigma and G must be inserted in seconds, not in ticks; 
+			       percent_white="60"
+			       base_dir="/home/volker/Documents/blockchain-journal/controllers/epuck_environment_classification/"
+			       use_multiple_nodes="true"
+			       use_background_geth_calls="true"
+			       interface_path="interface.txt"
+			       mapping_path="/home/volker/Documents/blockchain-journal/experiments/config0.txt"
+			       base_port="33000"
+			       blockchain_path="/home/volker/eth_data_para0/data"
+			       use_classical_approach="true"
+			       regenerate_file="/home/volker/Documents/mygithub-software/blockchain-journal/regenerate0.sh"
+			       percent_black="40"
+			       max_stored_opinions="20"
+			       sybil_attack="false"
+			       flooding_attack="true"
+			       replay_attack="false"/> <!-- Sigma and G must be inserted in seconds, not in ticks; 
 							  1 = Voter model; 2 = Direct comparison; 3 = Majority Rule-->
  
       </params>
     </epuck_environment_classification_controller>
   </controllers>
- <loop_functions  library="./build/loop_functions/libenvironment_classification_loop_functions"
+ <loop_functions  library="./build/loop_functions/environment_classification_loop_functions/libenvironment_classification_loop_functions"
                   label="environment_classification_loop_functions">
 
   <cells  number_of_red_cells="0"
-	  base_dir_loop="BASEDIR"
-	  data_dir="DATADIR"
+	  base_dir_loop="/home/volker/Documents/blockchain-journal/controllers/epuck_environment_classification/"
+	  data_dir="data/experiment1_decision1_mixingtrue_byzstyle1-node0-30-04-2019/140000/"
           number_of_white_cells="0"
 	  number_of_black_cells="0"
 	  using_percentage="true"
-	  percent_white="PERCENT_WHITE"
+	  percent_white="60"
 	  exit="true"            
-	  percent_black="PERCENT_BLACK"
+	  percent_black="40"
 	  percent_red="0"
 	  save_every_ticks="10"
 	  save_every_ticks_flag="true"
@@ -77,25 +84,29 @@
 	  save_every_robot_flag="false"
 	  save_every_quality_flag="true"
 	  save_global_stat_flag="false"
-	  radix="RADIX"
-	  number_of_robots="NUMROBOTS"
-	  number_of_runs="NUMRUNS"
+	  radix="num20_black40_byz0_run1"
+	  number_of_robots="20"
+	  number_of_runs="1"
 	  number_of_qualities="2"
 	  r_0="0"
-	  w_0="R0"
-	  b_0="B0"	  
-	  length_of_runs="LENGTHOFRUNS"
+	  w_0="20"
+	  b_0="0"	  
+	  length_of_runs="450"
 	  g="10"
 	  sigma="10"
 	  lambda="100"
 	  turn="45"
-	  epsilon="EPSILON"
-	  decision_rule="DECISIONRULE"
-	  num_byzantine="NUMBYZANTINE"
-	  byzantine_swarm_style="BYZANTINESWARMSTYLE"
-	  subswarm_consensus="SUBSWARMCONSENSUS"
-	  color_mixing="MIXING"
-	  determine_consensus="DETERMINECONSENSUS"/>
+	  miningdiff="1000000"
+	  decision_rule="1"
+	  base_port="33000"
+	  use_classical_approach="true"
+	  num_byzantine="0"
+	  byzantine_swarm_style="1"
+	  subswarm_consensus="false"
+	  regenerate_file="/home/volker/Documents/mygithub-software/blockchain-journal/regenerate0.sh"
+	  blockchain_path="/home/volker/eth_data_para0/data"
+	  color_mixing="true"
+	  determine_consensus="false"/>
 
   </loop_functions>
   <!-- *********************** -->
@@ -125,7 +136,7 @@
    <distribute>
       <position method="uniform" min="0.1,0.1,0" max="1.9 , 1.9, 0" />
       <orientation method="gaussian" mean="1,1,0 " std_dev="360,0,0 " />
-      <entity quantity="NUMROBOTS" max_trials="20">
+      <entity quantity="20" max_trials="20">
         <e-puck id="ep" >
           <controller config="epc" />
         </e-puck>
@@ -158,8 +169,8 @@
   <!-- ****************** -->
 
   <!-- ****************** -->
-  <!-- * Visualization * -->
-  <!-- ****************** -->
+  * Visualization *
+  ******************
   <visualization>
     <qt-opengl>
        

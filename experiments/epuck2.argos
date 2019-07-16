@@ -6,11 +6,11 @@
   <!-- ************************* -->
   <framework>
    
-    <system threads="0" />
+    <system threads="20" />
 
     <experiment length="0"
-                ticks_per_second="1"
-		real_time="false"
+                ticks_per_second="10"
+		real_time="true"
                 random_seed="0" />
 
   </framework>
@@ -21,12 +21,12 @@
 <controllers>
 
     <epuck_environment_classification_controller id="epc"
-     library="./build/controllers/libcontrollers">
+     library="/home/vstrobel/Documents/argdavide/build/controllers/epuck_environment_classification/libepuck_environment_classification.so">
      
       <actuators>
 	<epuck_wheels implementation="default" />
         <leds implementation="default" medium="leds" />
-        <epuck_range_and_bearing implementation="medium" medium="rab" range="0.50" />
+        <epuck_range_and_bearing implementation="medium" medium="rab" range="0.22" />
       </actuators>
       <sensors>
         <!--epuck_motor_ground implementation="rot_z_only" /-->
@@ -38,64 +38,73 @@
    
      	<simulation_parameters g="10" 
    			       sigma="10"
-			       turn="4"
-			       lambda="10"
-			       exploration_time="45"
+			       turn="45"
+			       lamda="100"
 			       exitFlag="true"
 			       profiling="true"
 			       decision_rule="1"
-			       num_pack_saved="20"
-			       max_stored_opinions="20"			       
-			       percent_white="75"
-			       percent_black="25"			       
-			       base_dir="/home/volker/Documents/mypapers/2019-frontiers/code/linear_consensus/controllers/epuck_environment_classification/"
-			       sybil_attack="false"
-			       flooding_attack="true"
-			       replay_attack="false"/> <!-- Sigma and G must be inserted in seconds, not in ticks; 
+			       num_pack_saved="2"
+			       percent_white="54"
+			       base_dir="/home/vstrobel/Documents/argdavide/controllers/epuck_environment_classification/"
+			       use_multiple_nodes="true"
+			       use_background_geth_calls="true"
+			       interface_path="interface.txt"
+			       mapping_path="/home/vstrobel/Documents/argdavide/experiments/config2.txt"
+			       base_port="33400"
+			       blockchain_path="/home/vstrobel/eth_data_para2/data"
+			       use_classical_approach="false"
+			       regenerate_file="/home/vstrobel/Documents/argdavide/regenerate2.sh"
+			       percent_black="46"/> <!-- Sigma and G must be inserted in seconds, not in ticks; 
 							  1 = Voter model; 2 = Direct comparison; 3 = Majority Rule-->
  
       </params>
     </epuck_environment_classification_controller>
   </controllers>
- <loop_functions  library="./build/loop_functions/libenvironment_classification_loop_functions"
+ <loop_functions  library="/home/vstrobel/Documents/argdavide/build/loop_functions/environment_classification_loop_functions/libenvironment_classification_loop_functions.so"
                   label="environment_classification_loop_functions">
 
   <cells  number_of_red_cells="0"
-	  base_dir_loop="/home/volker/Documents/mypapers/2019-frontiers/code/linear_consensus/controllers/epuck_environment_classification/"
-	  data_dir="raw_data/experiment1_decision1_mixingtrue_byzstyle1-16-07-2019//"
+	  base_dir_loop="/home/vstrobel/Documents/argdavide/controllers/epuck_environment_classification/"
+	  data_dir="data/experiment1_decision1-node2-15-11-2017/"
           number_of_white_cells="0"
 	  number_of_black_cells="0"
 	  using_percentage="true"
-	  percent_white="75"
+	  percent_white="54"
 	  exit="true"            
-	  percent_black="25"
+	  percent_black="46"
 	  percent_red="0"
-	  save_every_ticks="10"
-	  save_every_ticks_flag="true"
+	  save_every_ticks="100"
+	  save_every_ticks_flag="false"
 	  save_every_run_flag="true"
-	  save_blockchain_flag="true"
+	  save_blockchain_flag="false"
 	  save_every_robot_flag="false"
-	  save_every_quality_flag="true"
+	  save_every_quality_flag="false"
 	  save_global_stat_flag="false"
-	  radix="num20_black25_byz8_run3"
+	  radix="num20_black46_byz0_run1"
 	  number_of_robots="20"
 	  number_of_runs="1"
-	  number_of_qualities="2"
-	  r_0="0"
-	  w_0="20"
-	  b_0="0"	  
-	  length_of_runs="1000"
+    number_of_qualities="2"
+    r_0="0"
+    w_0="10"
+	  b_0="10"
+	  
+	  length_of_runs="10"
 	  g="10"
 	  sigma="10"
-	  lambda="100"
+	  lamda="100"
 	  turn="45"
-	  epsilon="EPSILON"
+	  miningdiff="1000000"
+	  use_multiple_nodes="true"
+	  miner_id="122"
+	  miner_node="2"
 	  decision_rule="1"
-	  num_byzantine="8"
-	  byzantine_swarm_style="1"
+	  base_port="33400"
+	  use_classical_approach="false"
+	  num_byzantine="0"
+	  byzantine_swarm_style="0"
 	  subswarm_consensus="false"
-	  color_mixing="true"
-	  determine_consensus="false"/>
+	  regenerate_file="/home/vstrobel/Documents/argdavide/regenerate2.sh"
+	  blockchain_path="/home/vstrobel/eth_data_para2/data"/>
 
   </loop_functions>
   <!-- *********************** -->
@@ -160,24 +169,24 @@
   <!-- ****************** -->
   <!-- * Visualization * -->
   <!-- ****************** -->
-  <visualization>
-    <qt-opengl>
+  <!-- <visualization> -->
+  <!--   <qt-opengl> -->
        
-      <camera>
-  	<placement idx="0" position="-0.861442,0.985724,1.41504" look_at="-0.179255,0.992546,0.683892" up="0.731109,0.00731134,0.682221" lens_focal_length="20" />
-        <placement idx="1" position="1.94098,0.736798,0.349611" look_at="2.85255,1.04903,0.0821098" lens_focal_length="20" />
-        <placement idx="3" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="4" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="5" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="6" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="7" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="8" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="9" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="10" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="11" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-     </camera>
-      <!-- <user_functions label="environment_classification_qt_user_functions" /> -->
-    </qt-opengl>
-  </visualization>
+  <!--     <camera> -->
+  <!-- 	<placement idx="0" position="-0.861442,0.985724,1.41504" look_at="-0.179255,0.992546,0.683892" up="0.731109,0.00731134,0.682221" lens_focal_length="20" /> -->
+  <!--       <placement idx="1" position="1.94098,0.736798,0.349611" look_at="2.85255,1.04903,0.0821098" lens_focal_length="20" /> -->
+  <!--       <placement idx="3" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="4" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="5" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="6" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="7" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="8" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="9" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="10" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="11" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--    </camera> -->
+  <!--     <!-\- <user_functions label="environment_classification_qt_user_functions" /> -\-> -->
+  <!--   </qt-opengl> -->
+  <!-- </visualization> -->
  
 </argos-configuration>
