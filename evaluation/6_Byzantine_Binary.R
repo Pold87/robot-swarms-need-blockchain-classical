@@ -1,5 +1,11 @@
 ######### 6_Byzantine_Binary
 
+source("aggregate_runs.R")
+source("myplothelpers.R")
+
+report.dir <- "../plots/"
+
+
 ## LAC
 decision <- 1
 byzstyle <- 1

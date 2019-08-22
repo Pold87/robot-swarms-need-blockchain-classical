@@ -168,8 +168,8 @@ plot.error.gg <- function(df, xlab, ylab, out.name, report.dir) {
               axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")))  +
         ylab(ylab) +
         xlab(xlab) +
-        base_breaks_y(seq(0.00, 1.00, 0.10)) +
-        base_breaks_x(seq(0.00, 1.00, 0.10)) 
+        base_breaks_y(seq(0, 100, 10)) +
+        base_breaks_x(seq(0, 100, 10)) 
 
     out.name <- paste0(report.dir, out.name)
     ggsave(out.name, width=7, height=4)    
@@ -194,8 +194,8 @@ plot.MAE.error <- function(df, xlab, ylab, out.name, report.dir) {
               axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")))  +
         ylab(ylab) +
         xlab(xlab) +
-        base_breaks_y(seq(0.00, 0.20, 0.02)) +
-        base_breaks_x(seq(0.00, 1.00, 0.10)) 
+        base_breaks_y(seq(0, 60, 5)) +
+        base_breaks_x(seq(0, 100, 10)) 
 
     out.name <- paste0(report.dir, out.name)
     ggsave(out.name, width=7, height=4)    

@@ -45,9 +45,9 @@ create.df <- function(folder, max.trials=30, dec=1, mixing="true", byzstyle=0, d
                                 last.row <- X[nrow(X), ]
                                 ab <- b
                                 ad <- round(diff / (100 - diff), 2)
-                                ae <- diff / 100
+                                ae <- diff
                                 up <-  ncol(X)
-                                af <- 1 - mean(as.numeric(last.row[2:up]))
+                                af <- (1 - mean(as.numeric(last.row[2:up]))) * 100
                                 ag <- nrow(X) + skipped.lines
                                 ah <- t
                                 my.list <- c(ab, ad, ae, af, ag, ah)
