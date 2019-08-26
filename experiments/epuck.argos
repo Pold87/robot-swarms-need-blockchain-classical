@@ -43,15 +43,15 @@
 			       exploration_time="45"
 			       exitFlag="true"
 			       profiling="true"
-			       decision_rule="1"
+			       decision_rule="2"
 			       num_pack_saved="20"
 			       max_stored_opinions="20"			       
 			       percent_white="75"
 			       percent_black="25"			       
 			       base_dir="/home/volker/Documents/mypapers/2019-frontiers/code/linear_consensus/controllers/epuck_environment_classification/"
-			       sybil_attack="false"
-			       flooding_attack="true"
-			       replay_attack="false"/> <!-- Sigma and G must be inserted in seconds, not in ticks; 
+			       sybil_attack=""
+			       flooding_attack=""
+			       replay_attack=""/> <!-- Sigma and G must be inserted in seconds, not in ticks; 
 							  1 = Voter model; 2 = Direct comparison; 3 = Majority Rule-->
  
       </params>
@@ -62,7 +62,7 @@
 
   <cells  number_of_red_cells="0"
 	  base_dir_loop="/home/volker/Documents/mypapers/2019-frontiers/code/linear_consensus/controllers/epuck_environment_classification/"
-	  data_dir="raw_data/experiment1_decision1_mixingtrue_byzstyle1-16-07-2019//"
+	  data_dir="data/5_Byzantine_2//"
           number_of_white_cells="0"
 	  number_of_black_cells="0"
 	  using_percentage="true"
@@ -77,7 +77,7 @@
 	  save_every_robot_flag="false"
 	  save_every_quality_flag="true"
 	  save_global_stat_flag="false"
-	  radix="num20_black25_byz8_run3"
+	  radix="num20_black25_byz9_run1"
 	  number_of_robots="20"
 	  number_of_runs="1"
 	  number_of_qualities="2"
@@ -89,9 +89,9 @@
 	  sigma="10"
 	  lambda="100"
 	  turn="45"
-	  epsilon="EPSILON"
-	  decision_rule="1"
-	  num_byzantine="8"
+	  epsilon="0.01"
+	  decision_rule="2"
+	  num_byzantine="9"
 	  byzantine_swarm_style="1"
 	  subswarm_consensus="false"
 	  color_mixing="true"
@@ -160,24 +160,24 @@
   <!-- ****************** -->
   <!-- * Visualization * -->
   <!-- ****************** -->
-  <visualization>
-    <qt-opengl>
+  <!-- <visualization> -->
+  <!--   <qt-opengl> -->
        
-      <camera>
-  	<placement idx="0" position="-0.861442,0.985724,1.41504" look_at="-0.179255,0.992546,0.683892" up="0.731109,0.00731134,0.682221" lens_focal_length="20" />
-        <placement idx="1" position="1.94098,0.736798,0.349611" look_at="2.85255,1.04903,0.0821098" lens_focal_length="20" />
-        <placement idx="3" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="4" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="5" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="6" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="7" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="8" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="9" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="10" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-        <placement idx="11" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" />
-     </camera>
-      <!-- <user_functions label="environment_classification_qt_user_functions" /> -->
-    </qt-opengl>
-  </visualization>
+  <!--     <camera> -->
+  <!-- 	<placement idx="0" position="-0.861442,0.985724,1.41504" look_at="-0.179255,0.992546,0.683892" up="0.731109,0.00731134,0.682221" lens_focal_length="20" /> -->
+  <!--       <placement idx="1" position="1.94098,0.736798,0.349611" look_at="2.85255,1.04903,0.0821098" lens_focal_length="20" /> -->
+  <!--       <placement idx="3" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="4" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="5" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="6" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="7" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="8" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="9" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="10" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--       <placement idx="11" position="-2,0,2" look_at="0,0,0" lens_focal_length="20" /> -->
+  <!--    </camera> -->
+  <!--     <!-\- <user_functions label="environment_classification_qt_user_functions" /> -\-> -->
+  <!--   </qt-opengl> -->
+  <!-- </visualization> -->
  
 </argos-configuration>
