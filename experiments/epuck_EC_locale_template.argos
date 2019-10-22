@@ -95,6 +95,7 @@
 	  byzantine_swarm_style="BYZANTINESWARMSTYLE"
 	  subswarm_consensus="SUBSWARMCONSENSUS"
 	  color_mixing="MIXING"
+	  random_env="RANDOMENV"
 	  determine_consensus="DETERMINECONSENSUS"/>
 
   </loop_functions>

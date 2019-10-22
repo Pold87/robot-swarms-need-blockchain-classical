@@ -133,7 +133,7 @@ bool CEnvironmentClassificationLoopFunctions::InitRobots() {
   }
 
 
-  if (colorMixing) {
+  if (colorMixing == 1) {
     
     int temp1;
     /* Mix the colours in the vector of cells to avoid the problem of eventual correlations*/
@@ -145,6 +145,11 @@ bool CEnvironmentClassificationLoopFunctions::InitRobots() {
 	grid[j] = temp1;
       }
     }    
+  } else if (colorMixing == 2) {
+    // For the binary field, we don't need to do anything
+    
+  } else if (colorMixing == 3) {
+
   }
   
 
@@ -255,9 +260,112 @@ void CEnvironmentClassificationLoopFunctions::Init(TConfigurationNode& t_node) {
 
       int k = 0;
       /* Generate random color for each cell according with the choosen probabilities*/
+
+      int myrow;
+      // Create regular grid
+      if (colorMixing == 3) {
+	while ( k <  TOTAL_CELLS) {
+
+	  myrow = k / 20;
+
+	  int everyXTile = 20;
+	  
+	  // numStripes calculates the number of stripes but does not say anything about the placement
+	int numStripes = (percentageOfColors[2] * (colorOfCell[1] + colorOfCell[2])) / 2000;
+
+	
+	vector<int> specialRows; 
+	
+	switch (numStripes) {
+	case 0:
+	case 20:
+	  break;
+	case 2:
+	case 18:
+	  specialRows.push_back(9);
+	  specialRows.push_back(11);	  
+	  break;
+
+	case 4:
+	case 16:
+	  specialRows.push_back(7);
+	  specialRows.push_back(9);	  
+	  specialRows.push_back(11);
+	  specialRows.push_back(13);	  
+	  break;
+
+	case 6:
+	case 14:
+	  specialRows.push_back(5);
+	  specialRows.push_back(7);
+	  specialRows.push_back(9);	  
+	  specialRows.push_back(11);
+	  specialRows.push_back(13);	  
+	  specialRows.push_back(15);	  
+	  break;
+
+
+	case 8:
+	case 12:
+	  specialRows.push_back(3);
+	  specialRows.push_back(5);
+	  specialRows.push_back(7);
+	  specialRows.push_back(9);	  
+	  specialRows.push_back(11);
+	  specialRows.push_back(13);	  
+	  specialRows.push_back(15);
+	  specialRows.push_back(17);	  
+
+	  break;
+
+	case 10:
+	  specialRows.push_back(1);
+	  specialRows.push_back(3);
+	  specialRows.push_back(5);
+	  specialRows.push_back(7);
+	  specialRows.push_back(9);	  
+	  specialRows.push_back(11);
+	  specialRows.push_back(13);	  
+	  specialRows.push_back(15);
+	  specialRows.push_back(17);
+	  specialRows.push_back(19);	  
+	  
+	  break;
+	  
+	}
+
+	int stripesColor, normalColor;
+	if (numStripes > 10) {
+	  stripesColor = 1;
+	  normalColor = 2;
+	} else {
+	  stripesColor = 2;
+	  normalColor = 1;
+	}
+	
+	if (find(specialRows.begin(), specialRows.end(), myrow)!=specialRows.end()) {
+	    grid[k] = stripesColor;
+	} else {
+	  grid[k] = normalColor;
+	}
+	
+	
+	// if ((myrow % everyXRow) == 0)  {
+	//   grid[k] = 2;
+	// } else {
+	//   grid[k] = 1;
+	// }
+	
+	k++;
+	}	
+	
+      } else {
+      
       for ( int i = 0; i < N_COL; i++ )
 	for( int j = 0; j < colorOfCell[i] ; j++,k++ )
 	  grid[k] = i;
+
+      }
 
       UInt32 i=0;
 
@@ -632,6 +740,7 @@ void CEnvironmentClassificationLoopFunctions::PreStep() {
 	bool within_epsilon = false;
 
 	vector<double> nonByzantineOpinions; 
+	vector<double> allOpinions; 
 
 	int num_robots = 0;
 
@@ -662,15 +771,24 @@ void CEnvironmentClassificationLoopFunctions::PreStep() {
 	  /* Byzantine consensus */
 	  if (cController.getNumExplorationPhase() > 1) {
 	    avgTotalQuality += (cController.getTotalQuality() - avgTotalQuality) / (u2 + 1);
+	    allOpinions.push_back(cController.getTotalQuality());
 	    u2++;
 	  }
 
 	}
 
 	if (minExplorationPhase > 2) {
-	  double max = *max_element(nonByzantineOpinions.begin(), nonByzantineOpinions.end());
-	  double min = *min_element(nonByzantineOpinions.begin(), nonByzantineOpinions.end());
-	  
+
+	double max, min;
+
+		if (subswarmConsensus) {
+	  max = *max_element(nonByzantineOpinions.begin(), nonByzantineOpinions.end());
+	  min = *min_element(nonByzantineOpinions.begin(), nonByzantineOpinions.end());
+		} else {
+	  max = *max_element(allOpinions.begin(), allOpinions.end());
+	  min = *min_element(allOpinions.begin(), allOpinions.end());
+		}
+
 	  //	  cout << "max is " << max << endl;
 	  //	  cout << "min is " << min << endl;
 

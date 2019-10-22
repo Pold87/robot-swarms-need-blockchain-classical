@@ -280,8 +280,6 @@ void EPuck_Environment_Classification::Explore() {
       }
     }
 
-
-
     
     if (byzantineStyle > 10 && byzantineStyle < 20) {
       /* Generate a random identity to steal identity from someone */

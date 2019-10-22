@@ -14,7 +14,6 @@ LENGTHOFRUNS=(1000)
 
 DETERMINECONSENSUS="false"
 BYZANTINESWARMSTYLES=(11)
-MIXINGS=("true") # mix or tiles or just have a binary field
 SUBSWARMCONSENSUS=false # Determines if all N robots have to agree or
 # only the beneficial subswarm.
 
