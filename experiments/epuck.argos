@@ -77,7 +77,7 @@
 	  save_every_robot_flag="false"
 	  save_every_quality_flag="true"
 	  save_global_stat_flag="false"
-	  radix="num20_black100_byz0_run30"
+	  radix="num20_black100_byz0_run100"
 	  number_of_robots="20"
 	  number_of_runs="1"
 	  number_of_qualities="2"

@@ -6,7 +6,7 @@ SCTEMPLATE='contracts/smart_contract_template.sol'
 SCOUT='contracts/smart_contract_threshold.sol'
 BASEDIR="$HOME/Documents/mypapers/2019-frontiers/code/linear_consensus/controllers/epuck_environment_classification/"
 NUMROBOTS=(20)
-REPETITIONS=30
+REPETITIONS=100
 
 NUMRUNS=1
 THREADS=0
