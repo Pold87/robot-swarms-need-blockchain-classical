@@ -8,10 +8,10 @@
 #define ALPHA_CHANNEL 0
 #define COLOR_STRENGTH 255
 #define TOTAL_CELLS 400
-#define ENVIRONMENT_CELL_DIMENSION 1000.0f
+#define ENVIRONMENT_CELL_DIMENSION 5000.0f
 #define N_COL 3
-#define ARENA_SIZE_X 1.9f
-#define ARENA_SIZE_Y 1.9f
+#define ARENA_SIZE_X 9.9f
+#define ARENA_SIZE_Y 9.9f
 
 #define DEBUGLOOP true
 
