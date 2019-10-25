@@ -6,7 +6,7 @@ SCTEMPLATE='contracts/smart_contract_template.sol'
 SCOUT='contracts/smart_contract_threshold.sol'
 BASEDIR="$HOME/Documents/mypapers/2019-frontiers/code/linear_consensus/controllers/epuck_environment_classification/"
 NUMROBOTS=(20)
-REPETITIONS=100
+REPETITIONS=30
 
 NUMRUNS=1
 THREADS=0
@@ -15,6 +15,18 @@ NOW=`date +"%d-%m-%Y"`
 REALTIME="false"
 FAKEIDENTITIES=(0)
 MIXINGS=(1) # mix or tiles, have a binary field, or a regular distribution
+
+ARENASIZEDIM="2.0"
+CELLDIMENSION="0.1"
+# Cell dimension should be ARENASIZE / 20 for 400 tiles
+# The cell dimension can be changed, this will result in more or less tiles
+# HOWEVER!!: Then you also have to change header file value for TOTAL_CELLS
+ARENASIZEPLUSLARGE=`echo $ARENASIZEDIM + 0.1 | bc`
+ARENASIZEPLUSSMALL=`echo $ARENASIZEDIM + 0.0075 | bc`
+ARENASIZEHALF=`echo $ARENASIZEDIM / 2 | bc`
+ARENASIZEMINUS=`echo $ARENASIZEDIM - 0.1 | bc`
+
+
 
 ## Byzantine styles
 # 1: Always send 0.0 as value
