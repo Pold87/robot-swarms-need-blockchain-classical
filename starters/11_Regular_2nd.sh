@@ -2,7 +2,7 @@
 
 . ./global_config.sh
 
-EXPERIMENT='9_Regular'
+EXPERIMENT='11_Regular_2nd'
 
 # Decision rule 1: LAC
 # Decision rule 2: W-MSR
